@@ -1,0 +1,31 @@
+@model PetViewModel
+@{
+    ViewData["Title"] = "Mis Mascotas";
+}
+
+<h1 class="display-4">Mis Mascotas</h1>
+<p>Seleccione las mascotas que tiene en casa.</p>
+
+@if (Model.HasSelection)
+{
+    <div class="alert alert-success" role="alert">
+        <h3 class="alert-heading">Mascotas registradas</h3>
+        <ul class="mb-0">
+            @foreach (var pet in Model.Pets.Where(p => p.Selected))
+            {
+                <li>@pet.Name</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-controller="Mascotas" asp-action="Index" method="post" novalidate>
+    @foreach (var pet in Model.Pets)
+    {
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="SelectedPets" value="@pet.Name" id="pet-@pet.Name" @(pet.Selected ? "checked" : "") />
+            <label class="form-check-label" for="pet-@pet.Name">@pet.Name</label>
+        </div>
+    }
+    <button type="submit" class="btn btn-primary mt-3">Registrar</button>
+</form>
