@@ -3,29 +3,65 @@
     ViewData["Title"] = "Mis Mascotas";
 }
 
-<h1 class="display-4">Mis Mascotas</h1>
-<p>Seleccione las mascotas que tiene en casa.</p>
+@functions {
+    string PetEmoji(string name) => name switch
+    {
+        "Perro" => "🐶",
+        "Gato" => "🐱",
+        "Pez" => "🐠",
+        "Loro" => "🦜",
+        "Hamster" => "🐹",
+        "Conejo" => "🐰",
+        "Tortuga" => "🐢",
+        _ => "🐾"
+    };
+}
+
+<div class="page-head">
+    <span class="eyebrow">Tu familia</span>
+    <h1 class="display-4 mt-2 mb-2">Mis Mascotas</h1>
+    <p>Marca las mascotas que viven contigo. Así podemos recomendarte lo que mejor les convenga.</p>
+</div>
 
 @if (Model.HasSelection)
 {
-    <div class="alert alert-success" role="alert">
-        <h3 class="alert-heading">Mascotas registradas</h3>
-        <ul class="mb-0">
-            @foreach (var pet in Model.Pets.Where(p => p.Selected))
-            {
-                <li>@pet.Name</li>
-            }
-        </ul>
+    <div class="alert alert-success d-flex align-items-start gap-3 mt-3" role="alert">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color: var(--amber); flex-shrink: 0;">
+            <circle cx="6" cy="7.2" r="2.6" />
+            <circle cx="12" cy="4.6" r="2.6" />
+            <circle cx="18" cy="7.2" r="2.6" />
+            <path d="M12 9.8c-3 0-5.1 2.8-5.1 5.1 0 2 1.4 3.1 3.1 3.1 1 0 1.6-.3 2-.3s1 .3 2 .3c1.7 0 3.1-1.1 3.1-3.1 0-2.3-2.1-5.1-5.1-5.1Z" />
+        </svg>
+        <div>
+            <h3 class="alert-heading mb-2">Mascotas registradas</h3>
+            <ul class="mb-0 list-unstyled d-flex flex-wrap gap-2">
+                @foreach (var pet in Model.Pets.Where(p => p.Selected))
+                {
+                    <li>
+                        <span class="badge rounded-pill text-bg-light border" style="color: var(--forest); font-weight: 700;">
+                            @PetEmoji(pet.Name) @pet.Name
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
     </div>
 }
 
 <form asp-controller="Mascotas" asp-action="Index" method="post" novalidate>
-    @foreach (var pet in Model.Pets)
-    {
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="SelectedPets" value="@pet.Name" id="pet-@pet.Name" @(pet.Selected ? "checked" : "") />
-            <label class="form-check-label" for="pet-@pet.Name">@pet.Name</label>
-        </div>
-    }
-    <button type="submit" class="btn btn-primary mt-3">Registrar</button>
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3 mt-1">
+        @foreach (var pet in Model.Pets)
+        {
+            <div class="col pet-chip">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="SelectedPets" value="@pet.Name" id="pet-@pet.Name" @(pet.Selected ? "checked" : "") />
+                    <label class="form-check-label" for="pet-@pet.Name">
+                        <span class="pet-emoji">@PetEmoji(pet.Name)</span>
+                        <span>@pet.Name</span>
+                    </label>
+                </div>
+            </div>
+        }
+    </div>
+    <button type="submit" class="btn btn-brand btn-lg mt-4 px-4">Registrar mascotas</button>
 </form>

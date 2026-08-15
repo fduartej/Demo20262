@@ -1,31 +1,436 @@
+/* ============================================================
+   Mundo Mascota — design tokens & components
+   ============================================================ */
+
+:root {
+  --forest: #2E5E3A;
+  --forest-deep: #24492E;
+  --forest-light: #3F7A4E;
+  --mint: #F0F6EE;
+  --amber: #F4A636;
+  --amber-deep: #DE8F1F;
+  --ink: #22301F;
+  --muted: #6B7868;
+  --paper: #FFFFFF;
+  --line: #DFE8DB;
+  --radius-lg: 1.25rem;
+  --radius-md: 0.875rem;
+  --shadow-soft: 0 6px 24px rgba(34, 48, 31, .08);
+  --shadow-lift: 0 14px 34px rgba(34, 48, 31, .16);
+}
+
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
+  font-size: 16px;
   position: relative;
   min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+  font-family: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background-color: var(--mint);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+main {
+  flex: 1 0 auto;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+h1, h2, h3, h4, h5, .display-4 {
+  font-family: "Baloo 2", "Nunito", system-ui, sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+a {
+  color: var(--forest);
+}
+
+::selection {
+  background: var(--amber);
+  color: var(--ink);
+}
+
+/* Keyboard focus (visible, not dependent on color alone) */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.form-control:focus-visible,
+a:focus-visible,
+.form-check-input:focus-visible + label {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.form-control:focus {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 .25rem rgba(46, 94, 58, .15);
+}
+
+/* ---- Eyebrow labels ---- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: 800;
+  font-size: .78rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 1.6rem;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--amber);
+}
+
+.eyebrow-light {
+  color: var(--amber);
+}
+
+.eyebrow-light::before {
+  background: var(--amber);
+}
+
+/* ---- Page head ---- */
+.page-head {
+  padding: 2rem 0 .25rem;
+}
+
+.page-head p {
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  border-radius: 99px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.btn-brand {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #fff;
+}
+
+.btn-brand:hover {
+  background: var(--forest-light);
+  border-color: var(--forest-light);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-sun {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: var(--ink);
+}
+
+.btn-sun:hover {
+  background: var(--amber-deep);
+  border-color: var(--amber-deep);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: currentColor;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, .12);
+  border-color: currentColor;
+}
+
+.btn-white {
+  background: #fff;
+  color: var(--forest);
+  border-color: #fff;
+}
+
+.btn-white:hover {
+  background: var(--mint);
+  color: var(--forest);
+  border-color: var(--mint);
+}
+
+/* ---- Navbar ---- */
+.navbar .nav-link {
+  border-radius: 99px;
+  font-weight: 700;
+  color: var(--ink);
+  padding: .45rem 1.1rem;
+}
+
+.navbar .nav-link:hover {
+  color: var(--forest);
+}
+
+.navbar .nav-link.active,
+.navbar .nav-link.active:hover {
+  background: var(--forest);
+  color: #fff;
+}
+
+.brand-name {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* ---- Cards ---- */
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  box-shadow: var(--shadow-soft);
+}
+
+.card-hover {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* ---- Product cards ---- */
+.product-card .card-img-top {
+  height: 220px;
+  object-fit: cover;
+}
+
+.badge-cat {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  background: rgba(255, 255, 255, .94);
+  color: var(--forest);
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: .72rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .35rem .8rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.price-pill {
+  background: var(--mint);
+  color: var(--forest);
+  border-radius: 99px;
+  padding: .25rem .95rem;
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+/* ---- Alerts ---- */
+.alert-success {
+  background: #E6F2E3;
+  border: 1px solid #C5E0BF;
+  color: var(--forest-deep);
+  border-radius: var(--radius-md);
+}
+
+/* ---- Forms ---- */
+.form-control {
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: .7rem 1rem;
+}
+
+.form-label {
+  font-weight: 700;
+}
+
+/* ---- Mascotas pet picker ---- */
+.pet-chip .form-check {
+  padding-left: 0;
+  margin: 0;
+}
+
+.pet-chip .form-check-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pet-chip label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: 1.25rem 1rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  cursor: pointer;
+  font-weight: 700;
+  height: 100%;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.pet-chip label:hover {
+  border-color: var(--forest-light);
+  transform: translateY(-3px);
+}
+
+.pet-chip .form-check-input:checked + label {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: #fff;
+}
+
+.pet-emoji {
+  font-size: 2.3rem;
+  line-height: 1;
+  transition: transform .15s ease;
+}
+
+.pet-chip .form-check-input:checked + label .pet-emoji {
+  transform: scale(1.15);
+}
+
+/* ---- Hero ---- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--forest-deep), var(--forest) 55%, var(--forest-light));
+  color: #fff;
+  border-radius: var(--radius-lg);
+  padding: 4.5rem 2.5rem;
+  margin-top: 1.5rem;
+}
+
+.hero h1 {
+  color: #fff;
+}
+
+.hero p {
+  color: rgba(255, 255, 255, .85);
+}
+
+.hero-paw {
+  position: absolute;
+  color: rgba(255, 255, 255, .07);
+  pointer-events: none;
+}
+
+.hero-paw-right {
+  top: -40px;
+  right: -30px;
+}
+
+.hero-paw-left {
+  bottom: -60px;
+  left: -50px;
+  transform: rotate(35deg);
+}
+
+.hero-paw-main {
+  color: var(--amber);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, .25));
+}
+
+.stat-num {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-weight: 800;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: #fff;
+}
+
+.stat-label {
+  display: block;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .7);
+}
+
+/* ---- Category cards ---- */
+.category-card {
+  display: block;
+  text-decoration: none;
+  height: 100%;
+}
+
+.category-card:hover {
+  color: var(--ink);
+}
+
+.category-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--forest);
+  display: grid;
+  place-items: center;
+  font-size: 1.7rem;
+  transition: background .15s ease, color .15s ease;
+}
+
+.category-card:hover .category-icon {
+  background: var(--forest);
+  color: #fff;
+}
+
+/* ---- CTA band ---- */
+.cta-band {
+  background: var(--forest);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-band h3 {
+  color: #fff;
+}
+
+.cta-band p {
+  color: rgba(255, 255, 255, .8);
+}
+
+/* ---- Footer ---- */
+.footer {
+  background: var(--forest-deep);
+  color: #D9E5D6;
+}
+
+.footer a {
+  color: var(--amber);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* ---- Motion: respect reduced preferences ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .card-hover:hover,
+  .pet-chip label:hover,
+  .btn:hover {
+    transform: none;
+  }
 }
