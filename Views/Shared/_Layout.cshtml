@@ -1,53 +1,98 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - _20262</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Mundo Mascota</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/_20262.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @functions {
+        string NavActive(string controller, string? action = null)
+        {
+            var c = ViewContext.RouteData.Values["controller"]?.ToString();
+            var a = ViewContext.RouteData.Values["action"]?.ToString();
+            if (c != controller || (action is not null && a != action))
+            {
+                return string.Empty;
+            }
+            return "active";
+        }
+    }
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">_20262</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom box-shadow">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color: var(--amber);">
+                        <circle cx="6" cy="7.2" r="2.6" />
+                        <circle cx="12" cy="4.6" r="2.6" />
+                        <circle cx="18" cy="7.2" r="2.6" />
+                        <path d="M12 9.8c-3 0-5.1 2.8-5.1 5.1 0 2 1.4 3.1 3.1 3.1 1 0 1.6-.3 2-.3s1 .3 2 .3c1.7 0 3.1-1.1 3.1-3.1 0-2.3-2.1-5.1-5.1-5.1Z" />
+                    </svg>
+                    <span class="brand-name">Mundo Mascota</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Abrir menú">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link @NavActive("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link @NavActive("Productos")" asp-area="" asp-controller="Productos" asp-action="Index">Productos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a>
+                            <a class="nav-link @NavActive("Mascotas")" asp-area="" asp-controller="Mascotas" asp-action="Index">Mascotas</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Mascotas" asp-action="Index">Mascotas</a>
+                            <a class="nav-link @NavActive("Home", "Contact")" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - _20262 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <main role="main" class="container pb-5">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container py-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6 d-flex align-items-center gap-2">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color: var(--amber);">
+                        <circle cx="6" cy="7.2" r="2.6" />
+                        <circle cx="12" cy="4.6" r="2.6" />
+                        <circle cx="18" cy="7.2" r="2.6" />
+                        <path d="M12 9.8c-3 0-5.1 2.8-5.1 5.1 0 2 1.4 3.1 3.1 3.1 1 0 1.6-.3 2-.3s1 .3 2 .3c1.7 0 3.1-1.1 3.1-3.1 0-2.3-2.1-5.1-5.1-5.1Z" />
+                    </svg>
+                    <div>
+                        <div class="brand-name" style="font-size: 1.1rem;">Mundo Mascota</div>
+                        <small>Todo para tus mejores amigos.</small>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a asp-controller="Home" asp-action="Index">Inicio</a> &nbsp;·&nbsp;
+                    <a asp-controller="Productos" asp-action="Index">Productos</a> &nbsp;·&nbsp;
+                    <a asp-controller="Mascotas" asp-action="Index">Mascotas</a> &nbsp;·&nbsp;
+                    <a asp-controller="Home" asp-action="Contact">Contacto</a> &nbsp;·&nbsp;
+                    <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
+                </div>
+            </div>
+            <hr class="border-light opacity-25 my-3" />
+            <div class="small text-center">&copy; 2026 Mundo Mascota. Hecho con cariño.</div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

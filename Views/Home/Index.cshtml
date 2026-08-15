@@ -1,8 +1,108 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero">
+    <svg class="hero-paw hero-paw-right" width="320" height="320" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <circle cx="6" cy="7.2" r="2.6" />
+        <circle cx="12" cy="4.6" r="2.6" />
+        <circle cx="18" cy="7.2" r="2.6" />
+        <path d="M12 9.8c-3 0-5.1 2.8-5.1 5.1 0 2 1.4 3.1 3.1 3.1 1 0 1.6-.3 2-.3s1 .3 2 .3c1.7 0 3.1-1.1 3.1-3.1 0-2.3-2.1-5.1-5.1-5.1Z" />
+    </svg>
+    <svg class="hero-paw hero-paw-left" width="260" height="260" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <circle cx="6" cy="7.2" r="2.6" />
+        <circle cx="12" cy="4.6" r="2.6" />
+        <circle cx="18" cy="7.2" r="2.6" />
+        <path d="M12 9.8c-3 0-5.1 2.8-5.1 5.1 0 2 1.4 3.1 3.1 3.1 1 0 1.6-.3 2-.3s1 .3 2 .3c1.7 0 3.1-1.1 3.1-3.1 0-2.3-2.1-5.1-5.1-5.1Z" />
+    </svg>
+
+    <div class="row align-items-center position-relative g-4">
+        <div class="col-lg-7">
+            <span class="eyebrow eyebrow-light">Tienda de mascotas</span>
+            <h1 class="display-4 fw-bold mt-2 mb-3">Todo para tus<br />mejores amigos</h1>
+            <p class="lead mb-4">
+                Alimentos, accesorios y juguetes para perros, gatos, aves y peces.
+                Encuentra en un solo lugar todo lo que tu mascota necesita.
+            </p>
+            <div class="d-flex gap-3 flex-wrap mb-4">
+                <a class="btn btn-sun btn-lg px-4" asp-controller="Productos" asp-action="Index">Ver productos</a>
+                <a class="btn btn-ghost btn-lg px-4" asp-controller="Mascotas" asp-action="Index">Registrar mascotas</a>
+            </div>
+            <div class="d-flex gap-5 flex-wrap">
+                <div>
+                    <span class="stat-num">4</span>
+                    <span class="stat-label">categorías</span>
+                </div>
+                <div>
+                    <span class="stat-num">8+</span>
+                    <span class="stat-label">productos</span>
+                </div>
+                <div>
+                    <span class="stat-num">7 días</span>
+                    <span class="stat-label">de atención</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+            <svg class="hero-paw-main" width="230" height="230" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="6" cy="7.2" r="2.6" />
+                <circle cx="12" cy="4.6" r="2.6" />
+                <circle cx="18" cy="7.2" r="2.6" />
+                <path d="M12 9.8c-3 0-5.1 2.8-5.1 5.1 0 2 1.4 3.1 3.1 3.1 1 0 1.6-.3 2-.3s1 .3 2 .3c1.7 0 3.1-1.1 3.1-3.1 0-2.3-2.1-5.1-5.1-5.1Z" />
+            </svg>
+        </div>
+    </div>
+</section>
+
+<section class="mt-5">
+    <span class="eyebrow">Lo que ofrecemos</span>
+    <h2 class="mt-2 mb-4">Categorías para cada mascota</h2>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
+        <div class="col">
+            <a class="card card-hover category-card p-4 h-100" asp-controller="Productos" asp-action="Index">
+                <span class="category-icon mb-3">🍖</span>
+                <h5 class="mb-1">Alimentos</h5>
+                <p class="text-muted mb-0">Croquetas balanceadas para perros y gatos.</p>
+            </a>
+        </div>
+        <div class="col">
+            <a class="card card-hover category-card p-4 h-100" asp-controller="Productos" asp-action="Index">
+                <span class="category-icon mb-3">🏠</span>
+                <h5 class="mb-1">Accesorios</h5>
+                <p class="text-muted mb-0">Camas, rascadores, jaulas y comodidad.</p>
+            </a>
+        </div>
+        <div class="col">
+            <a class="card card-hover category-card p-4 h-100" asp-controller="Productos" asp-action="Index">
+                <span class="category-icon mb-3">🎾</span>
+                <h5 class="mb-1">Juguetes</h5>
+                <p class="text-muted mb-0">Para que jueguen y se diviertan a diario.</p>
+            </a>
+        </div>
+        <div class="col">
+            <a class="card card-hover category-card p-4 h-100" asp-controller="Productos" asp-action="Index">
+                <span class="category-icon mb-3">🐠</span>
+                <h5 class="mb-1">Peceras</h5>
+                <p class="text-muted mb-0">Acuarios y accesorios para peces tropicales.</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="cta-band mt-5 p-4 p-lg-5">
+    <svg class="hero-paw hero-paw-right" width="260" height="260" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <circle cx="6" cy="7.2" r="2.6" />
+        <circle cx="12" cy="4.6" r="2.6" />
+        <circle cx="18" cy="7.2" r="2.6" />
+        <path d="M12 9.8c-3 0-5.1 2.8-5.1 5.1 0 2 1.4 3.1 3.1 3.1 1 0 1.6-.3 2-.3s1 .3 2 .3c1.7 0 3.1-1.1 3.1-3.1 0-2.3-2.1-5.1-5.1-5.1Z" />
+    </svg>
+    <div class="row align-items-center position-relative g-3">
+        <div class="col-md-8">
+            <h3 class="mb-1">¿Ya conoces a todos tus peludos?</h3>
+            <p class="mb-0">Registra las mascotas que viven contigo y mantén todo ordenado.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a class="btn btn-white btn-lg px-4" asp-controller="Mascotas" asp-action="Index">Registrar mascotas</a>
+        </div>
+    </div>
+</section>

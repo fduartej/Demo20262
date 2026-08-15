@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "nombre": "Alimento Premium para Perros 3kg",
+    "categoria": "Alimentos",
+    "precio": 89.9,
+    "descripcion": "Croquetas balanceadas con proteína de pollo para perros adultos.",
+    "imagenUrl": "https://placehold.co/600x400?text=Alimento+Perros",
+    "stock": 25
+  },
+  {
+    "id": 2,
+    "nombre": "Alimento para Gatos Adultos 1.5kg",
+    "categoria": "Alimentos",
+    "precio": 45.5,
+    "descripcion": "Alimento seco con sabor a pescado, rico en taurina.",
+    "imagenUrl": "https://placehold.co/600x400?text=Alimento+Gatos",
+    "stock": 40
+  },
+  {
+    "id": 3,
+    "nombre": "Cama Suave para Mascotas Grande",
+    "categoria": "Accesorios",
+    "precio": 129.0,
+    "descripcion": "Cama acolchada y lavable, ideal para perros y gatos de raza grande.",
+    "imagenUrl": "https://placehold.co/600x400?text=Cama+Grande",
+    "stock": 12
+  },
+  {
+    "id": 4,
+    "nombre": "Rascador para Gatos con Torre",
+    "categoria": "Accesorios",
+    "precio": 99.0,
+    "descripcion": "Rascador de tres niveles con plataformas y juguete colgante.",
+    "imagenUrl": "https://placehold.co/600x400?text=Rascador+Gatos",
+    "stock": 8
+  },
+  {
+    "id": 5,
+    "nombre": "Juguete Cuerda para Perro",
+    "categoria": "Juguetes",
+    "precio": 19.9,
+    "descripcion": "Cuerda trenzada resistente, perfecta para juegos de morder.",
+    "imagenUrl": "https://placehold.co/600x400?text=Juguete+Cuerda",
+    "stock": 60
+  },
+  {
+    "id": 6,
+    "nombre": "Pelota Squeaky para Mascotas",
+    "categoria": "Juguetes",
+    "precio": 15.0,
+    "descripcion": "Pelota de caucho con sonido, resistente a mordidas.",
+    "imagenUrl": "https://placehold.co/600x400?text=Pelota+Squeaky",
+    "stock": 55
+  },
+  {
+    "id": 7,
+    "nombre": "Acuario Pequeño 20L con Filtro",
+    "categoria": "Peceras",
+    "precio": 159.0,
+    "descripcion": "Acuario de vidrio con filtro y luz LED para peces tropicales.",
+    "imagenUrl": "https://placehold.co/600x400?text=Acuario+20L",
+    "stock": 5
+  },
+  {
+    "id": 8,
+    "nombre": "Jaula para Aves con Perchas",
+    "categoria": "Accesorios",
+    "precio": 110.0,
+    "descripcion": "Jaula espaciosa con comederos, bebederos y perchas de madera.",
+    "imagenUrl": "https://placehold.co/600x400?text=Jaula+Aves",
+    "stock": 9
+  }
+]

@@ -3,38 +3,75 @@
     ViewData["Title"] = "Contacto";
 }
 
-<h1 class="display-4">Contacto</h1>
+<div class="page-head">
+    <span class="eyebrow">Hablemos</span>
+    <h1 class="display-4 mt-2 mb-2">Contacto</h1>
+    <p>¿Tienes dudas sobre algún producto o quieres hacernos una consulta? Escríbenos y te respondemos a la brevedad.</p>
+</div>
 
 @if (TempData["ContactSuccess"] is string success)
 {
-    <div class="alert alert-success" role="alert">
-        @success
+    <div class="alert alert-success d-flex align-items-start gap-3 mt-3" role="alert">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;">
+            <path d="M4 12.5l5 5L20 6.5" />
+        </svg>
+        <div>@success</div>
     </div>
 }
 
-<form asp-controller="Home" asp-action="Contact" method="post" novalidate>
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row g-4 mt-1">
+    <div class="col-lg-7">
+        <div class="card p-4 p-lg-5">
+            <form asp-controller="Home" asp-action="Contact" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Tu nombre" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" type="email" placeholder="tucorreo@ejemplo.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Message" class="form-label"></label>
+                    <textarea asp-for="Message" class="form-control" rows="5" placeholder="¿En qué podemos ayudarte?"></textarea>
+                    <span asp-validation-for="Message" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-sun btn-lg px-4">Enviar mensaje</button>
+            </form>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" type="email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+    <div class="col-lg-5">
+        <div class="card p-4 p-lg-5 h-100" style="background: var(--forest); color: #fff;">
+            <h3 class="mb-3" style="color: #fff;">Ven a visitarnos</h3>
+            <div class="d-flex flex-column gap-3" style="color: rgba(255,255,255,.85);">
+                <div>
+                    <strong style="color: #fff;">Dirección</strong><br />
+                    Av. Las Mascotas 123, Lima
+                </div>
+                <div>
+                    <strong style="color: #fff;">Horario</strong><br />
+                    Lunes a sábado, 9:00 a. m. – 8:00 p. m.
+                </div>
+                <div>
+                    <strong style="color: #fff;">Teléfono</strong><br />
+                    (01) 555-1234
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,.2) !important;">
+                <p class="mb-0" style="color: rgba(255,255,255,.8);">Respondemos en menos de 24 horas. Tu consulta es importante para nosotros.</p>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Message" class="form-label"></label>
-        <textarea asp-for="Message" class="form-control" rows="5"></textarea>
-        <span asp-validation-for="Message" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Enviar</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

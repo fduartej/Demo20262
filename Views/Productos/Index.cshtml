@@ -1,0 +1,41 @@
+@model ProductoViewModel
+@{
+    ViewData["Title"] = "Catálogo de productos";
+}
+
+<div class="page-head">
+    <span class="eyebrow">Tienda</span>
+    <h1 class="display-4 mt-2 mb-2">Catálogo de productos</h1>
+    <p>Todo lo que tu mascota necesita: alimentos, accesorios, juguetes y más.</p>
+</div>
+
+@if (!Model.Productos.Any())
+{
+    <div class="card p-5 text-center mt-3">
+        <p class="mb-2 fs-4">No hay productos por ahora.</p>
+        <p class="text-muted mb-0">Agrega productos al archivo <code>wwwroot/data/productos.json</code> y recarga la página.</p>
+    </div>
+}
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 mt-1">
+    @foreach (var producto in Model.Productos)
+    {
+        <div class="col">
+            <div class="card card-hover product-card h-100 overflow-hidden position-relative">
+                <span class="badge-cat">@producto.Categoria</span>
+                <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre" loading="lazy" />
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@producto.Nombre</h5>
+                    <p class="card-text text-muted flex-grow-1">@producto.Descripcion</p>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="price-pill">S/ @producto.Precio.ToString("0.00")</span>
+                        <span class="small text-muted">@(producto.SinStock ? "Sin stock" : $"Stock: {producto.Stock}")</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                    <button type="button" class="btn btn-brand w-100" @(producto.SinStock ? "disabled" : "")>Agregar al carrito</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
