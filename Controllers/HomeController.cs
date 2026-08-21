@@ -1,11 +1,20 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using _20262.Data;
 using _20262.Models;
 
 namespace _20262.Controllers;
 
 public class HomeController : Controller
 {
+    private readonly ApplicationDbContext _context;
+
+    public HomeController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
     public IActionResult Index()
     {
         return View();
@@ -23,12 +32,23 @@ public class HomeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Contact(ContactViewModel model)
+    public async Task<IActionResult> Contact(ContactViewModel model)
     {
         if (!ModelState.IsValid)
         {
             return View(model);
         }
+
+        var contacto = new Contacto
+        {
+            Name = model.Name,
+            Email = model.Email,
+            Message = model.Message,
+            FechaRegistro = DateTime.Now
+        };
+
+        _context.Contactos.Add(contacto);
+        await _context.SaveChangesAsync();
 
         TempData["ContactSuccess"] = "Gracias por contactarnos, " + model.Name + ". Hemos recibido su mensaje.";
         return RedirectToAction(nameof(Contact));
