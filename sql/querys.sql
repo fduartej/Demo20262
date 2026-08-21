@@ -1,0 +1,1 @@
+SELECT * FROM t_contactos WHERE Message LIKE '%gato%';
