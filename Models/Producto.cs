@@ -15,8 +15,10 @@ public class Producto
     public string Nombre { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(100)]
-    public string Categoria { get; set; } = string.Empty;
+    public int CategoriaId { get; set; }
+
+    [ForeignKey(nameof(CategoriaId))]
+    public Categoria? Categoria { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]

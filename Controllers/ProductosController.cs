@@ -15,11 +15,21 @@ public class ProductosController : Controller
         _context = context;
     }
 
-    public IActionResult Index()
+public IActionResult Index(int? categoriaId)
     {
-       
-        var productos = _context.Productos.ToList();
+        IQueryable<Producto> productos = _context.Productos
+            .Include(p => p.Categoria);
 
-        return View(new ProductoViewModel { Productos = productos });
+        if (categoriaId.HasValue)
+        {
+            productos = productos.Where(p => p.CategoriaId == categoriaId.Value);
+        }
+
+        return View(new ProductoViewModel
+        {
+            Productos = productos.ToList(),
+            Categorias = _context.Categorias.OrderBy(c => c.Nombre).ToList(),
+            CategoriaId = categoriaId
+        });
     }
 }

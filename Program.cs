@@ -11,11 +11,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 var app = builder.Build();
 
-// Crea la base de datos pets.db y la tabla t_contactos (code first) si no existen.
+// Crea/aplica la base de datos pets.db (code first) con las migraciones si no existen.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

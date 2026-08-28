@@ -236,6 +236,35 @@ a:focus-visible,
   white-space: nowrap;
 }
 
+/* ---- Category filter ---- */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  color: var(--forest);
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: .85rem;
+  padding: .35rem 1.05rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--forest);
+  color: var(--forest);
+  transform: translateY(-1px);
+}
+
+.filter-chip.active,
+.filter-chip.active:hover {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #fff;
+}
+
 /* ---- Alerts ---- */
 .alert-success {
   background: #E6F2E3;
