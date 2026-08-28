@@ -7,4 +7,6 @@ public class ProductoViewModel
     public List<Categoria> Categorias { get; set; } = [];
 
     public int? CategoriaId { get; set; }
+
+    public string? Busqueda { get; set; }
 }

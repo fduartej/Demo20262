@@ -15,10 +15,16 @@ public class ProductosController : Controller
         _context = context;
     }
 
-public IActionResult Index(int? categoriaId)
+    public IActionResult Index(int? categoriaId, string? busqueda)
     {
         IQueryable<Producto> productos = _context.Productos
             .Include(p => p.Categoria);
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var termino = busqueda.Trim();
+            productos = productos.Where(p => p.Nombre.Contains(termino));
+        }
 
         if (categoriaId.HasValue)
         {
@@ -29,7 +35,8 @@ public IActionResult Index(int? categoriaId)
         {
             Productos = productos.ToList(),
             Categorias = _context.Categorias.OrderBy(c => c.Nombre).ToList(),
-            CategoriaId = categoriaId
+            CategoriaId = categoriaId,
+            Busqueda = busqueda
         });
     }
 }

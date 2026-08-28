@@ -9,12 +9,19 @@
     <p>Todo lo que tu mascota necesita: alimentos, accesorios, juguetes y más.</p>
 </div>
 
+<form asp-action="Index" asp-controller="Productos" method="get" role="search" class="d-flex gap-2 align-items-center mt-3">
+    <input type="search" name="busqueda" value="@Model.Busqueda" class="form-control flex-grow-1"
+           placeholder="Buscar producto por nombre..." aria-label="Buscar producto por nombre" />
+    <input type="hidden" name="categoriaId" value="@Model.CategoriaId" />
+    <button type="submit" class="btn btn-brand">Buscar</button>
+</form>
+
 <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mt-3">
     <span class="eyebrow me-1">Filtrar por categoría</span>
-    <a asp-action="Index" class="filter-chip @(Model.CategoriaId is null ? "active" : "")">Todos</a>
+    <a asp-action="Index" asp-route-busqueda="@Model.Busqueda" class="filter-chip @(Model.CategoriaId is null ? "active" : "")">Todos</a>
     @foreach (var categoria in Model.Categorias)
     {
-        <a asp-action="Index" asp-route-categoriaId="@categoria.Id"
+        <a asp-action="Index" asp-route-categoriaId="@categoria.Id" asp-route-busqueda="@Model.Busqueda"
            class="filter-chip @(Model.CategoriaId == categoria.Id ? "active" : "")">@categoria.Nombre</a>
     }
     <span class="ms-auto text-muted small">@Model.Productos.Count @(Model.Productos.Count == 1 ? "producto" : "productos")</span>
@@ -23,15 +30,21 @@
 @if (!Model.Productos.Any())
 {
     <div class="card p-5 text-center mt-3">
-        @if (Model.CategoriaId is not null)
+        @if (!string.IsNullOrEmpty(Model.Busqueda))
+        {
+            <p class="mb-2 fs-4">No se encontraron productos con "<strong>@Model.Busqueda</strong>".</p>
+            <p class="text-muted mb-0">Revisa la ortografía o prueba con otro nombre.</p>
+        }
+        else if (Model.CategoriaId is not null)
         {
             <p class="mb-2 fs-4">No hay productos en esta categoría.</p>
+            <p class="text-muted mb-0">Agrega productos al archivo <code>wwwroot/data/productos.json</code> y recarga la página.</p>
         }
         else
         {
             <p class="mb-2 fs-4">No hay productos por ahora.</p>
+            <p class="text-muted mb-0">Agrega productos al archivo <code>wwwroot/data/productos.json</code> y recarga la página.</p>
         }
-        <p class="text-muted mb-0">Agrega productos al archivo <code>wwwroot/data/productos.json</code> y recarga la página.</p>
     </div>
 }
 
