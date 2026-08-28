@@ -1,33 +1,24 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using _20262.Data;
 using _20262.Models;
 
 namespace _20262.Controllers;
 
 public class ProductosController : Controller
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
+    private readonly ApplicationDbContext _context;
 
-    private readonly IWebHostEnvironment _environment;
-
-    public ProductosController(IWebHostEnvironment environment)
+    public ProductosController(ApplicationDbContext context)
     {
-        _environment = environment;
+        _context = context;
     }
 
     public IActionResult Index()
     {
-        var path = Path.Combine(_environment.WebRootPath, "data", "productos.json");
-        var productos = new List<Producto>();
-
-        if (System.IO.File.Exists(path))
-        {
-            var json = System.IO.File.ReadAllText(path);
-            productos = JsonSerializer.Deserialize<List<Producto>>(json, JsonOptions) ?? [];
-        }
+       
+        var productos = _context.Productos.ToList();
 
         return View(new ProductoViewModel { Productos = productos });
     }
