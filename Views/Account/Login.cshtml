@@ -1,0 +1,54 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="page-head">
+    <span class="eyebrow">Bienvenido</span>
+    <h1 class="display-4 mt-2 mb-2">Iniciar sesión</h1>
+    <p>Accede a tu cuenta de Mundo Mascota para continuar.</p>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-7">
+        <div class="card p-4 p-lg-5">
+            <form asp-controller="Account" asp-action="Login" method="post" asp-route-returnurl="@returnUrl" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" type="email" placeholder="tucorreo@ejemplo.com" autofocus />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="RememberMe" class="form-check-input" type="checkbox" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+
+                <button type="submit" class="btn btn-brand btn-lg px-4">Iniciar sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card p-4 p-lg-5 h-100" style="background: var(--forest); color: #fff;">
+            <h3 class="mb-3" style="color: #fff;">¿Aún no tienes cuenta?</h3>
+            <p style="color: rgba(255,255,255,.85);">Regístrate gratis y disfruta de todos los beneficios de Mundo Mascota.</p>
+            <a asp-controller="Account" asp-action="Register" asp-route-returnurl="@returnUrl" class="btn btn-sun mt-2">
+                Crear una cuenta
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

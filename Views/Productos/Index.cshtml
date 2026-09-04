@@ -1,4 +1,5 @@
 @model ProductoViewModel
+@inject SignInManager<ApplicationUser> SignInManager
 @{
     ViewData["Title"] = "Catálogo de productos";
 }
@@ -65,6 +66,16 @@
                 </div>
                 <div class="card-footer bg-transparent border-0 pt-0 pb-3">
                     <button type="button" class="btn btn-brand w-100" @(producto.SinStock ? "disabled" : "")>Agregar al carrito</button>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var recordado = Model.Recordados.Contains(producto.Id);
+                        <form asp-controller="Productos" asp-action="@(recordado ? "NoRecordar" : "Recordar")" method="post" class="mt-2">
+                            <input type="hidden" name="id" value="@producto.Id" />
+                            <button type="submit" class="btn btn-@(recordado ? "sun" : "ghost") w-100">
+                                @(recordado ? "Quitar de recordados" : "Recordar")
+                            </button>
+                        </form>
+                    }
                 </div>
             </div>
         </div>
