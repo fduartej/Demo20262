@@ -1,0 +1,52 @@
+@model List<Producto>
+@{
+    ViewData["Title"] = "Mis recordados";
+}
+
+<div class="page-head">
+    <span class="eyebrow">Sesión</span>
+    <h1 class="display-4 mt-2 mb-2">Productos a recordar</h1>
+    <p>Estos productos se guardan en tu <strong>sesión</strong> mientras estás logueado. Al cerrar sesión se borran automáticamente.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="card p-5 text-center mt-3">
+        <p class="mb-2 fs-4">No tienes productos a recordar.</p>
+        <p class="text-muted mb-0">Ve al catálogo y presiona "Recordar" en los productos que quieras conservar.</p>
+        <a asp-controller="Productos" asp-action="Index" class="btn btn-brand mt-3 d-inline-block mx-auto">Ir al catálogo</a>
+    </div>
+}
+else
+{
+    <div class="d-flex align-items-center justify-content-between mt-3">
+        <span class="text-muted small">@Model.Count @(Model.Count == 1 ? "producto" : "productos") guardados en la sesión</span>
+        <a asp-controller="Productos" asp-action="Index" class="filter-chip">Agregar más</a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 mt-1">
+        @foreach (var producto in Model)
+        {
+            <div class="col">
+                <div class="card card-hover product-card h-100 overflow-hidden position-relative">
+                    <span class="badge-cat">@producto.Categoria?.Nombre</span>
+                    <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre" loading="lazy" />
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@producto.Nombre</h5>
+                        <p class="card-text text-muted flex-grow-1">@producto.Descripcion</p>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="price-pill">S/ @producto.Precio.ToString("0.00")</span>
+                            <span class="small text-muted">@(producto.SinStock ? "Sin stock" : $"Stock: {producto.Stock}")</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                        <form asp-controller="Productos" asp-action="NoRecordar" method="post">
+                            <input type="hidden" name="id" value="@producto.Id" />
+                            <button type="submit" class="btn btn-sun w-100">Quitar de recordados</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

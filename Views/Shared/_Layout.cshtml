@@ -24,6 +24,7 @@
             return "active";
         }
     }
+    @inject SignInManager<ApplicationUser> SignInManager
 
     <header>
         <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom box-shadow">
@@ -55,6 +56,29 @@
                         <li class="nav-item">
                             <a class="nav-link @NavActive("Home", "Contact")" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a>
                         </li>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link" style="cursor: default;">Hola, @User.Identity?.Name</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @NavActive("Account", "Recordados")" asp-area="" asp-controller="Account" asp-action="Recordados">Mis recordados</a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-link nav-link" style="--bs-btn-padding-x: 1.1rem;">Cerrar sesión</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @NavActive("Account", "Login")" asp-area="" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                            </li>
+                            <li class="nav-item ms-lg-1">
+                                <a class="btn btn-brand btn-sm mt-1 mt-lg-0" style="border-radius: 99px;" asp-area="" asp-controller="Account" asp-action="Register">Registrarse</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

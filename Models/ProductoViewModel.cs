@@ -9,4 +9,6 @@ public class ProductoViewModel
     public int? CategoriaId { get; set; }
 
     public string? Busqueda { get; set; }
+
+    public List<int> Recordados { get; set; } = [];
 }
