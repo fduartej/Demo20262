@@ -62,7 +62,10 @@
                                 <span class="nav-link" style="cursor: default;">Hola, @User.Identity?.Name</span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @NavActive("Account", "Recordados")" asp-area="" asp-controller="Account" asp-action="Recordados">Mis recordados</a>
+                                <a class="nav-link @NavActive("Account", "Recordados")" asp-area="" asp-controller="Account" asp-action="Recordados">
+                                    Mis recordados
+                                    <span id="contador-recordados" class="badge rounded-pill ms-1" style="display: none; background: var(--forest); color: #fff;">0</span>
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">

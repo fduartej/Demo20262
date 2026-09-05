@@ -69,7 +69,8 @@
                     @if (SignInManager.IsSignedIn(User))
                     {
                         var recordado = Model.Recordados.Contains(producto.Id);
-                        <form asp-controller="Productos" asp-action="@(recordado ? "NoRecordar" : "Recordar")" method="post" class="mt-2">
+                        <form asp-controller="Productos" asp-action="@(recordado ? "NoRecordar" : "Recordar")" method="post" class="mt-2"
+                              data-recordar="@(recordado ? "NoRecordar" : "Recordar")" data-id="@producto.Id">
                             <input type="hidden" name="id" value="@producto.Id" />
                             <button type="submit" class="btn btn-@(recordado ? "sun" : "ghost") w-100">
                                 @(recordado ? "Quitar de recordados" : "Recordar")

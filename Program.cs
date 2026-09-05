@@ -1,14 +1,26 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using _20262.Data;
 using _20262.Models;
+using _20262.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDistributedMemoryCache();
+// Caché distribuida (Redis) para el catálogo de productos.
+builder.Services.Configure<CatalogCacheOptions>(builder.Configuration.GetSection(CatalogCacheOptions.SectionName));
+
+var redisConfig = builder.Configuration.GetSection("Redis");
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConfig["ConnectionString"];
+    options.InstanceName = redisConfig["InstanceName"];
+});
+
+builder.Services.AddScoped<ProductoService>();
 
 builder.Services.AddSession(options =>
 {
@@ -57,6 +69,10 @@ using (var scope = app.Services.CreateScope())
         var user = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
         await userManager.CreateAsync(user, adminPassword);
     }
+
+    // Precarga el catálogo en Redis en el arranque (si WarmupOnStartup está activo).
+    var productoService = scope.ServiceProvider.GetRequiredService<ProductoService>();
+    await productoService.PrecalentarCacheAsync();
 }
 
 // Configure the HTTP request pipeline.

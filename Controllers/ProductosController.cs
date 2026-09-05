@@ -1,43 +1,44 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using _20262.Data;
 using _20262.Models;
+using _20262.Services;
 
 namespace _20262.Controllers;
 
 public class ProductosController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ProductoService _productoService;
 
     private const string SessionKey = "ProductosRecordados";
 
-    public ProductosController(ApplicationDbContext context)
+    public ProductosController(ProductoService productoService)
     {
-        _context = context;
+        _productoService = productoService;
     }
 
-    public IActionResult Index(int? categoriaId, string? busqueda)
+    public async Task<IActionResult> Index(int? categoriaId, string? busqueda)
     {
-        IQueryable<Producto> productos = _context.Productos
-            .Include(p => p.Categoria);
+        var productos = await _productoService.ObtenerProductosAsync();
+        var categorias = await _productoService.ObtenerCategoriasAsync();
+
+        IEnumerable<Producto> resultado = productos;
 
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
             var termino = busqueda.Trim();
-            productos = productos.Where(p => p.Nombre.Contains(termino));
+            resultado = resultado.Where(p => p.Nombre.Contains(termino, StringComparison.OrdinalIgnoreCase));
         }
 
         if (categoriaId.HasValue)
         {
-            productos = productos.Where(p => p.CategoriaId == categoriaId.Value);
+            resultado = resultado.Where(p => p.CategoriaId == categoriaId.Value);
         }
 
         return View(new ProductoViewModel
         {
-            Productos = productos.ToList(),
-            Categorias = _context.Categorias.OrderBy(c => c.Nombre).ToList(),
+            Productos = resultado.ToList(),
+            Categorias = categorias,
             CategoriaId = categoriaId,
             Busqueda = busqueda,
             Recordados = ObtenerRecordados()
