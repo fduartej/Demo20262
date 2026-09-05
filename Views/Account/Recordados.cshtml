@@ -40,7 +40,7 @@ else
                         </div>
                     </div>
                     <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                        <form asp-controller="Productos" asp-action="NoRecordar" method="post">
+                        <form asp-controller="Productos" asp-action="NoRecordar" method="post" data-recordar="NoRecordar" data-id="@producto.Id">
                             <input type="hidden" name="id" value="@producto.Id" />
                             <button type="submit" class="btn btn-sun w-100">Quitar de recordados</button>
                         </form>

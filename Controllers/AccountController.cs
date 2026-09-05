@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using _20262.Data;
 using _20262.Models;
+using _20262.Services;
 
 namespace _20262.Controllers;
 
@@ -14,23 +14,30 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly ApplicationDbContext _context;
+    private readonly ProductoService _productoService;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        ApplicationDbContext context)
+        ProductoService productoService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _context = context;
+        _productoService = productoService;
     }
 
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
-        return View();
+
+        var model = new LoginViewModel { RememberMe = true };
+        if (Request.Cookies["RememberEmail"] is { } email)
+        {
+            model.Email = email;
+        }
+
+        return View(model);
     }
 
     [HttpPost]
@@ -41,6 +48,21 @@ public class AccountController : Controller
 
         if (ModelState.IsValid)
         {
+            if (model.RememberMe)
+            {
+                Response.Cookies.Append("RememberEmail", model.Email, new CookieOptions
+                {
+                    Expires = DateTimeOffset.Now.AddDays(30),
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Lax
+                });
+            }
+            else
+            {
+                Response.Cookies.Delete("RememberEmail");
+            }
+
             var result = await _signInManager.PasswordSignInAsync(
                 model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
@@ -98,19 +120,16 @@ public class AccountController : Controller
     }
 
     [Authorize]
-    public IActionResult Recordados()
+    public async Task<IActionResult> Recordados()
     {
         var json = HttpContext.Session.GetString("ProductosRecordados");
         var ids = string.IsNullOrEmpty(json)
             ? new List<int>()
             : JsonSerializer.Deserialize<List<int>>(json) ?? new List<int>();
 
-        var productos = _context.Productos
-            .Include(p => p.Categoria)
-            .Where(p => ids.Contains(p.Id))
-            .ToList();
+        var productos = await _productoService.ObtenerProductosAsync();
 
-        return View(productos);
+        return View(productos.Where(p => ids.Contains(p.Id)).ToList());
     }
 
     [HttpGet]
