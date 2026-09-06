@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using _20262.Data;
-using _20262.Models;
+using _20262.Models.Entities;
 using _20262.Services;
 
 var builder = WebApplication.CreateBuilder(args);

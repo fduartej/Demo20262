@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using _20262.Models;
+using _20262.Models.ViewModels;
 
 namespace _20262.Controllers;
 

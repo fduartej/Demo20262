@@ -1,7 +1,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using _20262.Models;
+using _20262.Models.Entities;
+using _20262.Models.ViewModels;
 using _20262.Services;
 
 namespace _20262.Controllers;
