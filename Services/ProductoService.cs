@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using _20262.Data;
-using _20262.Models;
+using _20262.Models.Entities;
 
 namespace _20262.Services;
 

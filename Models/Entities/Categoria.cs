@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace _20262.Models;
+namespace _20262.Models.Entities;
 
 [Table("t_categorias")]
 public class Categoria

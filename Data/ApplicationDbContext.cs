@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using _20262.Models;
+using _20262.Models.Entities;
 
 namespace _20262.Data;
 

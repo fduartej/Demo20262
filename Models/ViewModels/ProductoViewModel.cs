@@ -1,4 +1,6 @@
-namespace _20262.Models;
+using _20262.Models.Entities;
+
+namespace _20262.Models.ViewModels;
 
 public class ProductoViewModel
 {
