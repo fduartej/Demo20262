@@ -12,6 +12,10 @@ builder.Services.AddControllersWithViews();
 
 // Caché distribuida (Redis) para el catálogo de productos.
 builder.Services.Configure<CatalogCacheOptions>(builder.Configuration.GetSection(CatalogCacheOptions.SectionName));
+builder.Services.Configure<PieSocketOptions>(builder.Configuration.GetSection(PieSocketOptions.SectionName));
+
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<PieSocketService>();
 
 var redisConfig = builder.Configuration.GetSection("Redis");
 builder.Services.AddStackExchangeRedisCache(options =>

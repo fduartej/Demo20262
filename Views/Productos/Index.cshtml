@@ -53,7 +53,7 @@
     @foreach (var producto in Model.Productos)
     {
         <div class="col">
-            <div class="card card-hover product-card h-100 overflow-hidden position-relative">
+            <div class="card card-hover product-card h-100 overflow-hidden position-relative" data-producto-id="@producto.Id" data-stock="@producto.Stock">
                 <span class="badge-cat">@producto.Categoria?.Nombre</span>
                 <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre" loading="lazy" />
                 <div class="card-body d-flex flex-column">
@@ -61,11 +61,15 @@
                     <p class="card-text text-muted flex-grow-1">@producto.Descripcion</p>
                     <div class="d-flex justify-content-between align-items-center mt-2">
                         <span class="price-pill">S/ @producto.Precio.ToString("0.00")</span>
-                        <span class="small text-muted">@(producto.SinStock ? "Sin stock" : $"Stock: {producto.Stock}")</span>
+                        <span class="small text-muted producto-stock">@(producto.SinStock ? "Sin stock" : $"Stock: {producto.Stock}")</span>
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                    <button type="button" class="btn btn-brand w-100" @(producto.SinStock ? "disabled" : "")>Agregar al carrito</button>
+                    <button type="button" class="btn btn-brand w-100 btn-agregar-carrito" @(producto.SinStock ? "disabled" : "")>Agregar al carrito</button>
+                    <form asp-controller="Productos" asp-action="ReducirStock" method="post" class="mt-2">
+                        <input type="hidden" name="id" value="@producto.Id" />
+                        <button type="submit" class="btn btn-ghost w-100 btn-reducir-stock" @(producto.SinStock ? "disabled" : "")>Reducir stock</button>
+                    </form>
                     @if (SignInManager.IsSignedIn(User))
                     {
                         var recordado = Model.Recordados.Contains(producto.Id);
@@ -82,3 +86,51 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    @if (!string.IsNullOrEmpty(Model.WebSocketUrl))
+    {
+        <script>
+            (function () {
+                const cards = Array.from(document.querySelectorAll('[data-producto-id]'));
+                const cardById = new Map(cards.map(c => [Number(c.dataset.productoId), c]));
+
+                function aplicarStock(card, stock) {
+                    card.dataset.stock = stock;
+                    const span = card.querySelector('.producto-stock');
+                    if (span) {
+                        span.textContent = stock <= 0 ? 'Sin stock' : `Stock: ${stock}`;
+                    }
+                    const agregar = card.querySelector('.btn-agregar-carrito');
+                    const reducir = card.querySelector('.btn-reducir-stock');
+                    if (agregar) agregar.disabled = stock <= 0;
+                    if (reducir) reducir.disabled = stock <= 0;
+                }
+
+                function conectar() {
+                    const socket = new WebSocket('@Model.WebSocketUrl');
+
+                    socket.onmessage = function (event) {
+                        try {
+                            const msg = JSON.parse(event.data);
+                            if (msg.event !== 'stock-reducido') return;
+                            const datos = msg.data;
+                            const card = cardById.get(Number(datos.productoId));
+                            if (card) aplicarStock(card, Number(datos.stock));
+                        } catch (e) {
+                            console.error('PieSocket: mensaje inválido', e);
+                        }
+                    };
+
+                    socket.onclose = function () {
+                        setTimeout(conectar, 3000);
+                    };
+                }
+
+                if (cards.length > 0) {
+                    conectar();
+                }
+            })();
+        </script>
+    }
+}

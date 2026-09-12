@@ -13,4 +13,6 @@ public class ProductoViewModel
     public string? Busqueda { get; set; }
 
     public List<int> Recordados { get; set; } = [];
+
+    public string? WebSocketUrl { get; set; }
 }
