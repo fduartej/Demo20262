@@ -43,6 +43,7 @@
             {
                 <form asp-controller="Productos" asp-action="@(Model.Recordado ? "NoRecordar" : "Recordar")" method="post"
                       data-recordar="@(Model.Recordado ? "NoRecordar" : "Recordar")" data-id="@producto.Id">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@producto.Id" />
                     <button type="submit" class="btn btn-@(Model.Recordado ? "sun" : "ghost") btn-lg">
                         @(Model.Recordado ? "Quitar de recordados" : "Recordar")

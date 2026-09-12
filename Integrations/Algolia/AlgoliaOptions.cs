@@ -12,8 +12,13 @@ public class AlgoliaOptions
 
     public string IndexName { get; set; } = "productos";
 
-    public bool IsConfigured =>
+    public bool IsSearchConfigured =>
         !string.IsNullOrWhiteSpace(ApplicationId) &&
         !string.IsNullOrWhiteSpace(ApiKeySearch) &&
-        !string.IsNullOrWhiteSpace(ApiKeyWrite);
+        !string.IsNullOrWhiteSpace(IndexName);
+
+    public bool IsWriteConfigured =>
+        !string.IsNullOrWhiteSpace(ApplicationId) &&
+        !string.IsNullOrWhiteSpace(ApiKeyWrite) &&
+        !string.IsNullOrWhiteSpace(IndexName);
 }

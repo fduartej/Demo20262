@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = "Catálogo de productos";
     var busquedaActiva = !string.IsNullOrWhiteSpace(Model.Busqueda);
+    var filtrosTodos = new Dictionary<string, string?>();
+    if (busquedaActiva)
+    {
+        filtrosTodos["busqueda"] = Model.Busqueda;
+    }
 }
 
 <div class="page-head">
@@ -20,10 +25,10 @@
 
 <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mt-3">
     <span class="eyebrow me-1">Filtrar por categoría</span>
-    <a asp-action="Index" asp-route-busqueda="@Model.Busqueda" class="filter-chip @(Model.CategoriaId is null ? "active" : "")">Todos</a>
+    <a asp-action="Index" asp-all-route-data="filtrosTodos" class="filter-chip @(Model.CategoriaId is null ? "active" : "")">Todos</a>
     @foreach (var categoria in Model.Categorias)
     {
-        <a asp-action="Index" asp-route-categoriaId="@categoria.Id" asp-route-busqueda="@Model.Busqueda"
+        <a asp-action="Index" asp-route-categoriaId="@categoria.Id" asp-all-route-data="filtrosTodos"
            class="filter-chip @(Model.CategoriaId == categoria.Id ? "active" : "")">@categoria.Nombre</a>
     }
     @if (busquedaActiva && Model.AlgoliaResult is not null)
@@ -93,6 +98,7 @@
                         var recordado = Model.Recordados.Contains(producto.Id);
                         <form asp-controller="Productos" asp-action="@(recordado ? "NoRecordar" : "Recordar")" method="post" class="mt-2"
                               data-recordar="@(recordado ? "NoRecordar" : "Recordar")" data-id="@producto.Id">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@producto.Id" />
                             <button type="submit" class="btn btn-@(recordado ? "sun" : "ghost") w-100">
                                 @(recordado ? "Quitar de recordados" : "Recordar")
@@ -112,8 +118,8 @@
             @if (Model.AlgoliaResult.Page > 0)
             {
                 <li class="page-item">
-                    <a class="page-link" asp-action="Index" asp-route-busqueda="@Model.Busqueda"
-                       asp-route-categoriaId="@Model.CategoriaId" asp-route-page="@(Model.AlgoliaResult.Page - 1)">Anterior</a>
+                    <a class="page-link" asp-action="Index" asp-route-categoriaId="@Model.CategoriaId"
+                       asp-all-route-data="filtrosTodos" asp-route-page="@(Model.AlgoliaResult.Page - 1)">Anterior</a>
                 </li>
             }
             else
@@ -123,15 +129,15 @@
             @for (var i = 0; i < Model.AlgoliaResult.NbPages; i++)
             {
                 <li class="page-item @(i == Model.AlgoliaResult.Page ? "active" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-busqueda="@Model.Busqueda"
-                       asp-route-categoriaId="@Model.CategoriaId" asp-route-page="@i">@(i + 1)</a>
+                    <a class="page-link" asp-action="Index" asp-route-categoriaId="@Model.CategoriaId"
+                       asp-all-route-data="filtrosTodos" asp-route-page="@i">@(i + 1)</a>
                 </li>
             }
             @if (Model.AlgoliaResult.Page < Model.AlgoliaResult.NbPages - 1)
             {
                 <li class="page-item">
-                    <a class="page-link" asp-action="Index" asp-route-busqueda="@Model.Busqueda"
-                       asp-route-categoriaId="@Model.CategoriaId" asp-route-page="@(Model.AlgoliaResult.Page + 1)">Siguiente</a>
+                    <a class="page-link" asp-action="Index" asp-route-categoriaId="@Model.CategoriaId"
+                       asp-all-route-data="filtrosTodos" asp-route-page="@(Model.AlgoliaResult.Page + 1)">Siguiente</a>
                 </li>
             }
             else

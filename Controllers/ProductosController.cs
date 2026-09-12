@@ -14,7 +14,8 @@ public class ProductosController : Controller
     private readonly ProductoService _productoService;
     private readonly IAlgoliaSearchService _algoliaSearch;
     private readonly IAlgoliaIndexService _algoliaIndex;
-    private readonly bool _algoliaConfigurado;
+    private readonly bool _algoliaBusquedaConfigurada;
+    private readonly bool _algoliaEscrituraConfigurada;
     private readonly ILogger<ProductosController> _logger;
 
     private const string SessionKey = "ProductosRecordados";
@@ -29,18 +30,20 @@ public class ProductosController : Controller
         _productoService = productoService;
         _algoliaSearch = algoliaSearch;
         _algoliaIndex = algoliaIndex;
-        _algoliaConfigurado = algoliaOptions.Value.IsConfigured;
+        _algoliaBusquedaConfigurada = algoliaOptions.Value.IsSearchConfigured;
+        _algoliaEscrituraConfigurada = algoliaOptions.Value.IsWriteConfigured;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index(int? categoriaId, string? busqueda, int page = 0)
     {
+        var busquedaLog = SanitizeForLog(busqueda);
         _logger.LogInformation("Productos.Index | busqueda='{Busqueda}' categoriaId={CategoriaId} page={Page} algoliaConfigurado={Algolia}",
-            busqueda, categoriaId, page, _algoliaConfigurado);
+            busquedaLog, categoriaId, page, _algoliaBusquedaConfigurada);
 
-        if (!string.IsNullOrWhiteSpace(busqueda) && _algoliaConfigurado)
+        if (!string.IsNullOrWhiteSpace(busqueda) && _algoliaBusquedaConfigurada)
         {
-            _logger.LogInformation("Productos.Index | Usando Algolia para la búsqueda '{Busqueda}'.", busqueda);
+            _logger.LogInformation("Productos.Index | Usando Algolia para la búsqueda '{Busqueda}'.", busquedaLog);
             return await SearchWithAlgolia(busqueda, categoriaId, page);
         }
 
@@ -77,9 +80,10 @@ public class ProductosController : Controller
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var result = await _algoliaSearch.SearchAsync(busqueda, categoriaId, page);
         stopwatch.Stop();
+        var busquedaLog = SanitizeForLog(busqueda);
 
         _logger.LogInformation("Algolia | Consulta='{Busqueda}' CategoriaId={CategoriaId} page={Page} => {Hits} resultados ({NbPages} páginas) en {Ms}ms",
-            busqueda, categoriaId, page, result.NbHits, result.NbPages, stopwatch.ElapsedMilliseconds);
+            busquedaLog, categoriaId, page, result.NbHits, result.NbPages, stopwatch.ElapsedMilliseconds);
 
         var categorias = await _productoService.ObtenerCategoriasAsync();
 
@@ -176,6 +180,12 @@ public class ProductosController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SyncAlgolia()
     {
+        if (!_algoliaEscrituraConfigurada)
+        {
+            TempData["AlgoliaSync"] = "Configura ApplicationId, ApiKeyWrite e IndexName de Algolia antes de sincronizar el índice.";
+            return RedirectToAction(nameof(Index));
+        }
+
         _logger.LogInformation("Algolia | Iniciando sincronización completa del índice por '{User}'.", User.Identity?.Name);
         var count = await _algoliaIndex.SyncProductosAsync();
         _logger.LogInformation("Algolia | Sincronización completada: {Count} productos.", count);
@@ -206,4 +216,9 @@ public class ProductosController : Controller
     {
         HttpContext.Session.SetString(SessionKey, JsonSerializer.Serialize(ids));
     }
+
+    private static string SanitizeForLog(string? value) =>
+        string.IsNullOrEmpty(value)
+            ? string.Empty
+            : value.Replace("\r", "\\r").Replace("\n", "\\n");
 }

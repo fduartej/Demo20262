@@ -50,7 +50,7 @@
                 </button>
                 <div class="navbar-collapse collapse" id="mainNav">
                     <div class="navbar-search-block d-flex flex-column flex-lg-row align-items-stretch gap-2 me-lg-3 mb-2 mb-lg-0">
-                        @if (algolia.IsConfigured)
+                        @if (algolia.IsSearchConfigured)
                         {
                             <div id="algolia-searchbox" role="search"
                                  data-algolia-app-id="@algolia.ApplicationId"

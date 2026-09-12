@@ -28,8 +28,9 @@ public class AlgoliaSearchService : IAlgoliaSearchService
         int hitsPerPage = 20,
         CancellationToken cancellationToken = default)
     {
+        var queryLog = SanitizeForLog(query);
         _logger.LogInformation("Algolia.SearchAsync | AppId='{AppId}' Index='{Index}' Query='{Query}' CategoriaId={CategoriaId} Page={Page} HitsPerPage={HitsPerPage}",
-            _options.ApplicationId, _options.IndexName, query, categoriaId, page, hitsPerPage);
+            _options.ApplicationId, _options.IndexName, queryLog, categoriaId, page, hitsPerPage);
 
         try
         {
@@ -111,8 +112,13 @@ public class AlgoliaSearchService : IAlgoliaSearchService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Algolia.SearchAsync | Error buscando '{Query}' en Algolia.", query);
+            _logger.LogError(ex, "Algolia.SearchAsync | Error buscando '{Query}' en Algolia.", queryLog);
             return new AlgoliaSearchResult<AlgoliaProducto>();
         }
     }
+
+    private static string SanitizeForLog(string? value) =>
+        string.IsNullOrEmpty(value)
+            ? string.Empty
+            : value.Replace("\r", "\\r").Replace("\n", "\\n");
 }
