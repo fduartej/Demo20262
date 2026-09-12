@@ -1,0 +1,66 @@
+@model ProductoDetalleViewModel
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = Model.Producto.Nombre;
+    var producto = Model.Producto;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb small mt-3 mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Productos" asp-action="Index">Catálogo</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@producto.Nombre</li>
+    </ol>
+</nav>
+
+<div class="row g-4 mt-1 align-items-start">
+    <div class="col-md-6 col-lg-5">
+        <div class="card overflow-hidden shadow-sm">
+            <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre" loading="lazy" />
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-7">
+        <span class="eyebrow">@producto.Categoria?.Nombre</span>
+        <h1 class="display-5 mb-3">@producto.Nombre</h1>
+
+        <p class="lead text-muted">@producto.Descripcion</p>
+
+        <div class="d-flex flex-wrap align-items-center gap-3 my-4">
+            <span class="price-pill fs-3">S/ @producto.Precio.ToString("0.00")</span>
+            <span class="small text-muted">
+                @(producto.SinStock
+                    ? "Sin stock por el momento"
+                    : $"Hay {producto.Stock} {((producto.Stock == 1) ? "unidad disponible" : "unidades disponibles")}")
+            </span>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <button type="button" class="btn btn-brand btn-lg px-4" @(producto.SinStock ? "disabled" : "")>
+                Agregar al carrito
+            </button>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <form asp-controller="Productos" asp-action="@(Model.Recordado ? "NoRecordar" : "Recordar")" method="post"
+                      data-recordar="@(Model.Recordado ? "NoRecordar" : "Recordar")" data-id="@producto.Id">
+                    <input type="hidden" name="id" value="@producto.Id" />
+                    <button type="submit" class="btn btn-@(Model.Recordado ? "sun" : "ghost") btn-lg">
+                        @(Model.Recordado ? "Quitar de recordados" : "Recordar")
+                    </button>
+                </form>
+            }
+        </div>
+
+        <div class="card bg-white shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Detalles</h2>
+                <ul class="list-unstyled mb-0 small">
+                    <li class="mb-2"><strong>Categoría:</strong> @producto.Categoria?.Nombre</li>
+                    <li class="mb-2"><strong>Precio:</strong> S/ @producto.Precio.ToString("0.00")</li>
+                    <li class="mb-2"><strong>Stock:</strong> @producto.Stock</li>
+                    <li class="mb-0"><strong>Referencia:</strong> MM-@producto.Id.ToString("D4")</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

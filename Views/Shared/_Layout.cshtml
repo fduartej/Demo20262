@@ -1,4 +1,10 @@
 ﻿<!DOCTYPE html>
+@using Microsoft.Extensions.Options
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IOptions<AlgoliaOptions> AlgoliaOptions
+@{
+    var algolia = AlgoliaOptions.Value;
+}
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -8,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/@@algolia/autocomplete-theme-classic/dist/theme.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/_20262.styles.css" asp-append-version="true" />
 </head>
@@ -24,7 +31,6 @@
             return "active";
         }
     }
-    @inject SignInManager<ApplicationUser> SignInManager
 
     <header>
         <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom box-shadow">
@@ -43,6 +49,23 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse" id="mainNav">
+                    <div class="navbar-search-block d-flex flex-column flex-lg-row align-items-stretch gap-2 me-lg-3 mb-2 mb-lg-0">
+                        @if (algolia.IsConfigured)
+                        {
+                            <div id="algolia-searchbox" role="search"
+                                 data-algolia-app-id="@algolia.ApplicationId"
+                                 data-algolia-search-key="@algolia.ApiKeySearch"
+                                 data-algolia-index="@algolia.IndexName"></div>
+                        }
+                        else
+                        {
+                            <form asp-controller="Productos" asp-action="Index" method="get" role="search" class="d-flex gap-1">
+                                <input type="search" name="busqueda" class="form-control form-control-sm flex-grow-1"
+                                       placeholder="Buscar producto..." aria-label="Buscar producto" />
+                                <button type="submit" class="btn btn-brand btn-sm d-none d-lg-inline-block">Buscar</button>
+                            </form>
+                        }
+                    </div>
                     <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
                         <li class="nav-item">
                             <a class="nav-link @NavActive("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
@@ -126,7 +149,10 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/algoliasearch/dist/algoliasearch-lite.umd.js" asp-append-version="true"></script>
+    <script src="~/lib/@@algolia/autocomplete-js/dist/umd/index.production.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/algolia-autocomplete.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
