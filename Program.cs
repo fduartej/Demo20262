@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using _20262.Data;
+using _20262.Integrations.Algolia;
 using _20262.Models.Entities;
 using _20262.Services;
 
@@ -9,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Algolia search integration.
+builder.Services.Configure<AlgoliaOptions>(builder.Configuration.GetSection(AlgoliaOptions.SectionName));
+builder.Services.AddScoped<IAlgoliaSearchService, AlgoliaSearchService>();
+builder.Services.AddScoped<IAlgoliaIndexService, AlgoliaIndexService>();
 
 // Caché distribuida (Redis) para el catálogo de productos.
 builder.Services.Configure<CatalogCacheOptions>(builder.Configuration.GetSection(CatalogCacheOptions.SectionName));
@@ -64,10 +70,22 @@ using (var scope = app.Services.CreateScope())
     const string adminEmail = "admin@mundomascota.com";
     const string adminPassword = "Admin123";
 
-    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    var admin = await userManager.FindByEmailAsync(adminEmail);
+    if (admin == null)
     {
-        var user = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
-        await userManager.CreateAsync(user, adminPassword);
+        admin = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
+        await userManager.CreateAsync(admin, adminPassword);
+    }
+
+    // Asegura el rol "Admin" y lo asigna al administrador.
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+    if (!await userManager.IsInRoleAsync(admin, "Admin"))
+    {
+        await userManager.AddToRoleAsync(admin, "Admin");
     }
 
     // Precarga el catálogo en Redis en el arranque (si WarmupOnStartup está activo).

@@ -2,6 +2,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @{
     ViewData["Title"] = "Catálogo de productos";
+    var busquedaActiva = !string.IsNullOrWhiteSpace(Model.Busqueda);
 }
 
 <div class="page-head">
@@ -12,7 +13,7 @@
 
 <form asp-action="Index" asp-controller="Productos" method="get" role="search" class="d-flex gap-2 align-items-center mt-3">
     <input type="search" name="busqueda" value="@Model.Busqueda" class="form-control flex-grow-1"
-           placeholder="Buscar producto por nombre..." aria-label="Buscar producto por nombre" />
+           placeholder="Buscar producto por nombre..." aria-label="Buscar producto por nombre" autofocus="@busquedaActiva" />
     <input type="hidden" name="categoriaId" value="@Model.CategoriaId" />
     <button type="submit" class="btn btn-brand">Buscar</button>
 </form>
@@ -25,26 +26,47 @@
         <a asp-action="Index" asp-route-categoriaId="@categoria.Id" asp-route-busqueda="@Model.Busqueda"
            class="filter-chip @(Model.CategoriaId == categoria.Id ? "active" : "")">@categoria.Nombre</a>
     }
-    <span class="ms-auto text-muted small">@Model.Productos.Count @(Model.Productos.Count == 1 ? "producto" : "productos")</span>
+    @if (busquedaActiva && Model.AlgoliaResult is not null)
+    {
+        <span class="ms-auto text-muted small">@Model.AlgoliaResult.NbHits @(Model.AlgoliaResult.NbHits == 1 ? "resultado" : "resultados") en Algolia</span>
+    }
+    else
+    {
+        <span class="ms-auto text-muted small">@Model.Productos.Count @(Model.Productos.Count == 1 ? "producto" : "productos")</span>
+    }
 </div>
+
+@if (TempData["AlgoliaSync"] is not null)
+{
+    <div class="alert alert-success mt-3 mb-0" role="alert">@TempData["AlgoliaSync"]</div>
+}
 
 @if (!Model.Productos.Any())
 {
     <div class="card p-5 text-center mt-3">
-        @if (!string.IsNullOrEmpty(Model.Busqueda))
+        @if (busquedaActiva)
         {
             <p class="mb-2 fs-4">No se encontraron productos con "<strong>@Model.Busqueda</strong>".</p>
-            <p class="text-muted mb-0">Revisa la ortografía o prueba con otro nombre.</p>
+            <div class="d-flex gap-2 justify-content-center">
+                <p class="text-muted mb-0">Revisa la ortografía o prueba con otro nombre.</p>
+                @if (User.IsInRole("Admin"))
+                {
+                    <form asp-action="SyncAlgolia" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-link p-0 align-baseline">Sincronizar índice</button>
+                    </form>
+                }
+            </div>
         }
         else if (Model.CategoriaId is not null)
         {
             <p class="mb-2 fs-4">No hay productos en esta categoría.</p>
-            <p class="text-muted mb-0">Agrega productos al archivo <code>wwwroot/data/productos.json</code> y recarga la página.</p>
+            <p class="text-muted mb-0">Prueba con otra categoría.</p>
         }
         else
         {
             <p class="mb-2 fs-4">No hay productos por ahora.</p>
-            <p class="text-muted mb-0">Agrega productos al archivo <code>wwwroot/data/productos.json</code> y recarga la página.</p>
+            <p class="text-muted mb-0">Agrega productos a la base de datos.</p>
         }
     </div>
 }
@@ -82,3 +104,40 @@
         </div>
     }
 </div>
+
+@if (busquedaActiva && Model.AlgoliaResult is not null && Model.AlgoliaResult.NbPages > 1)
+{
+    <nav aria-label="Paginación de resultados" class="mt-4">
+        <ul class="pagination justify-content-center">
+            @if (Model.AlgoliaResult.Page > 0)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" asp-route-busqueda="@Model.Busqueda"
+                       asp-route-categoriaId="@Model.CategoriaId" asp-route-page="@(Model.AlgoliaResult.Page - 1)">Anterior</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+            }
+            @for (var i = 0; i < Model.AlgoliaResult.NbPages; i++)
+            {
+                <li class="page-item @(i == Model.AlgoliaResult.Page ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-busqueda="@Model.Busqueda"
+                       asp-route-categoriaId="@Model.CategoriaId" asp-route-page="@i">@(i + 1)</a>
+                </li>
+            }
+            @if (Model.AlgoliaResult.Page < Model.AlgoliaResult.NbPages - 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" asp-route-busqueda="@Model.Busqueda"
+                       asp-route-categoriaId="@Model.CategoriaId" asp-route-page="@(Model.AlgoliaResult.Page + 1)">Siguiente</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+            }
+        </ul>
+    </nav>
+}
