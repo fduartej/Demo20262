@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using _20262.Data;
+using _20262.Integrations;
 using _20262.Models.Entities;
 using _20262.Services;
 
@@ -21,6 +22,12 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services.AddScoped<ProductoService>();
+
+// Integración con la API pública de dummyjson (listas de tareas).
+builder.Services.AddHttpClient<ITodoClient, TodoClient>(client =>
+{
+    client.BaseAddress = new Uri("https://dummyjson.com/");
+});
 
 builder.Services.AddSession(options =>
 {

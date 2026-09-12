@@ -1,0 +1,36 @@
+@model TodoItem
+@{
+    ViewData["Title"] = "Tarea #" + Model.Id;
+}
+
+<div class="page-head">
+    <span class="eyebrow">Integración</span>
+    <h1 class="display-4 mt-2 mb-2">@Model.Todo</h1>
+    <p>Detalle de la tarea consultado en la API de <a href="https://dummyjson.com/todos/@Model.Id" target="_blank" rel="noopener">dummyjson.com/todos/@Model.Id</a>.</p>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <input type="checkbox" class="form-check-input fs-3" disabled @(Model.Completed ? "checked" : "") />
+            <span class="badge rounded-pill @(Model.Completed ? "text-bg-success" : "text-bg-warning") px-3 py-2 fs-6">
+                @(Model.Completed ? "Completada" : "Pendiente")
+            </span>
+        </div>
+        <dl class="row mb-0">
+            <dt class="col-sm-3 fw-bold">ID</dt>
+            <dd class="col-sm-9">#@Model.Id</dd>
+            <dt class="col-sm-3 fw-bold">Descripción</dt>
+            <dd class="col-sm-9">@Model.Todo</dd>
+            <dt class="col-sm-3 fw-bold">Estado</dt>
+            <dd class="col-sm-9">@(Model.Completed ? "Completada" : "Pendiente")</dd>
+            <dt class="col-sm-3 fw-bold">Usuario</dt>
+            <dd class="col-sm-9">#@Model.UserId</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-brand">Volver a la lista</a>
+    <a href="https://dummyjson.com/todos/@Model.Id" class="btn btn-ghost ms-2" target="_blank" rel="noopener">Ver JSON de la API</a>
+</div>

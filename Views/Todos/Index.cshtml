@@ -1,0 +1,43 @@
+@model List<TodoItem>
+@{
+    ViewData["Title"] = "Lista de Tareas";
+}
+
+<div class="page-head">
+    <span class="eyebrow">Integración</span>
+    <h1 class="display-4 mt-2 mb-2">Lista de Tareas</h1>
+    <p>Tus tareas provienen de la API de <a href="https://dummyjson.com/todos" target="_blank" rel="noopener">dummyjson.com/todos</a>. Selecciona una para ver su detalle.</p>
+</div>
+
+<div class="filter-bar d-flex flex-wrap align-items-center gap-2 mt-3">
+    <span class="ms-auto text-muted small">@Model.Count @(Model.Count == 1 ? "tarea" : "tareas")</span>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card p-5 text-center mt-3">
+        <p class="mb-2 fs-4">No hay tareas por ahora.</p>
+        <p class="text-muted mb-0">La API de dummyjson no devolvió elementos.</p>
+    </div>
+}
+
+<div class="list-group mt-3">
+    @foreach (var item in Model)
+    {
+        <a asp-action="Detalle" asp-route-id="@item.Id"
+           class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
+            <input type="checkbox" class="form-check-input mt-0 fs-5" disabled @(item.Completed ? "checked" : "") />
+            <div class="flex-grow-1">
+                <div class="fw-bold @(item.Completed ? "text-decoration-line-through text-muted" : "")">@item.Todo</div>
+                <small class="text-muted">Tarea #@item.Id</small>
+            </div>
+            <span class="badge rounded-pill @(item.Completed ? "text-bg-success" : "text-bg-warning") px-3 py-2">
+                @(item.Completed ? "Completada" : "Pendiente")
+            </span>
+        </a>
+    }
+</div>
+
+<div class="mt-4">
+    <a class="btn btn-brand" href="https://dummyjson.com/todos" target="_blank" rel="noopener">Ver API de tareas</a>
+</div>

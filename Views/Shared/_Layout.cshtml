@@ -54,6 +54,9 @@
                             <a class="nav-link @NavActive("Mascotas")" asp-area="" asp-controller="Mascotas" asp-action="Index">Mascotas</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link @NavActive("Todos")" asp-area="" asp-controller="Todos" asp-action="Index">Tareas</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link @NavActive("Home", "Contact")" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a>
                         </li>
                         @if (SignInManager.IsSignedIn(User))
@@ -111,6 +114,7 @@
                     <a asp-controller="Home" asp-action="Index">Inicio</a> &nbsp;·&nbsp;
                     <a asp-controller="Productos" asp-action="Index">Productos</a> &nbsp;·&nbsp;
                     <a asp-controller="Mascotas" asp-action="Index">Mascotas</a> &nbsp;·&nbsp;
+                    <a asp-controller="Todos" asp-action="Index">Tareas</a> &nbsp;·&nbsp;
                     <a asp-controller="Home" asp-action="Contact">Contacto</a> &nbsp;·&nbsp;
                     <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
                 </div>
