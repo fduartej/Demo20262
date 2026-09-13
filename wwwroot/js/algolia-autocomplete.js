@@ -92,7 +92,9 @@
 
                         var res = await index.search(query, {
                             hitsPerPage: 6,
-                            attributesToRetrieve: ['Id', 'Nombre', 'Precio', 'ImagenUrl', 'Stock', 'CategoriaId']
+                            attributesToRetrieve: ['Id', 'Nombre', 'Precio', 'ImagenUrl', 'Stock', 'CategoriaId'],
+                            highlightPreTag: '__aa-highlight__',
+                            highlightPostTag: '__/aa-highlight__'
                         });
                         return res.hits || [];
                     },
