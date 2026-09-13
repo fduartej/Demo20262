@@ -33,6 +33,16 @@ public class ProductosController : Controller
         _algoliaBusquedaConfigurada = algoliaOptions.Value.IsSearchConfigured;
         _algoliaEscrituraConfigurada = algoliaOptions.Value.IsWriteConfigured;
         _logger = logger;
+    private readonly PieSocketService _pieSocketService;
+    private readonly Microsoft.Extensions.Options.IOptions<PieSocketOptions> _pieSocketOptions;
+
+    private const string SessionKey = "ProductosRecordados";
+
+    public ProductosController(ProductoService productoService, PieSocketService pieSocketService, Microsoft.Extensions.Options.IOptions<PieSocketOptions> pieSocketOptions)
+    {
+        _productoService = productoService;
+        _pieSocketService = pieSocketService;
+        _pieSocketOptions = pieSocketOptions;
     }
 
     public async Task<IActionResult> Index(int? categoriaId, string? busqueda, int page = 0)
@@ -71,7 +81,8 @@ public class ProductosController : Controller
             Categorias = categorias,
             CategoriaId = categoriaId,
             Busqueda = busqueda,
-            Recordados = ObtenerRecordados()
+            Recordados = ObtenerRecordados(),
+            WebSocketUrl = _pieSocketOptions.Value.WebSocketUrl
         });
     }
 
@@ -155,6 +166,20 @@ public class ProductosController : Controller
         {
             recordados.Add(id);
             GuardarRecordados(recordados);
+        }
+
+        return RedirectToLocal();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReducirStock(int id)
+    {
+        var nuevoStock = await _productoService.ReducirStockAsync(id);
+
+        if (nuevoStock.HasValue)
+        {
+            await _pieSocketService.PublicarStockReducidoAsync(id, nuevoStock.Value);
         }
 
         return RedirectToLocal();

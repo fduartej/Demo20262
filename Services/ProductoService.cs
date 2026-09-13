@@ -121,6 +121,22 @@ public class ProductoService
         return categorias;
     }
 
+    public async Task<int?> ReducirStockAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var producto = await _context.Productos.FindAsync([id], cancellationToken);
+        if (producto is null || producto.Stock <= 0)
+        {
+            return null;
+        }
+
+        producto.Stock -= 1;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await _cache.RemoveAsync(_options.ProductosKey, cancellationToken);
+
+        return producto.Stock;
+    }
+
     public async Task PrecalentarCacheAsync(CancellationToken cancellationToken = default)
     {
         if (!_options.WarmupOnStartup)

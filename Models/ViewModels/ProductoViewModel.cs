@@ -16,4 +16,5 @@ public class ProductoViewModel
     public List<int> Recordados { get; set; } = [];
 
     public AlgoliaSearchResult<AlgoliaProducto>? AlgoliaResult { get; set; }
+    public string? WebSocketUrl { get; set; }
 }
