@@ -50,6 +50,60 @@ public class ProductoService
         return productos;
     }
 
+    public async Task<Producto?> ObtenerProductoAsync(int id, CancellationToken cancellationToken = default)
+        => await _context.Productos
+            .AsNoTracking()
+            .Include(p => p.Categoria)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+    public async Task<bool> ExisteCategoriaAsync(int id, CancellationToken cancellationToken = default)
+        => await _context.Categorias.AsNoTracking().AnyAsync(c => c.Id == id, cancellationToken);
+
+    public async Task<Producto> CrearProductoAsync(Producto producto, CancellationToken cancellationToken = default)
+    {
+        _context.Productos.Add(producto);
+        await _context.SaveChangesAsync(cancellationToken);
+        await InvalidarCacheAsync(cancellationToken);
+        return producto;
+    }
+
+    public async Task<bool> ActualizarProductoAsync(Producto producto, CancellationToken cancellationToken = default)
+    {
+        _context.Productos.Update(producto);
+        var cambios = await _context.SaveChangesAsync(cancellationToken);
+        if (cambios > 0)
+        {
+            await InvalidarCacheAsync(cancellationToken);
+        }
+        return cambios > 0;
+    }
+
+    public async Task<bool> EliminarProductoAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var producto = await _context.Productos.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        if (producto is null)
+        {
+            return false;
+        }
+
+        _context.Productos.Remove(producto);
+        await _context.SaveChangesAsync(cancellationToken);
+        await InvalidarCacheAsync(cancellationToken);
+        return true;
+    }
+
+    private async Task InvalidarCacheAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _cache.RemoveAsync(_options.ProductosKey, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error al invalidar '{Key}' en Redis.", _options.ProductosKey);
+        }
+    }
+
     public async Task<List<Categoria>> ObtenerCategoriasAsync(CancellationToken cancellationToken = default)
     {
         var cacheado = await ObtenerDeCacheAsync<List<Categoria>>(_options.CategoriasKey, cancellationToken);
