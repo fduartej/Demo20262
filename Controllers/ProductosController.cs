@@ -17,6 +17,8 @@ public class ProductosController : Controller
     private readonly bool _algoliaBusquedaConfigurada;
     private readonly bool _algoliaEscrituraConfigurada;
     private readonly ILogger<ProductosController> _logger;
+    private readonly PieSocketService _pieSocketService;
+    private readonly IOptions<PieSocketOptions> _pieSocketOptions;
 
     private const string SessionKey = "ProductosRecordados";
 
@@ -25,7 +27,9 @@ public class ProductosController : Controller
         IAlgoliaSearchService algoliaSearch,
         IAlgoliaIndexService algoliaIndex,
         IOptions<AlgoliaOptions> algoliaOptions,
-        ILogger<ProductosController> logger)
+        ILogger<ProductosController> logger,
+        PieSocketService pieSocketService,
+        IOptions<PieSocketOptions> pieSocketOptions)
     {
         _productoService = productoService;
         _algoliaSearch = algoliaSearch;
@@ -33,14 +37,6 @@ public class ProductosController : Controller
         _algoliaBusquedaConfigurada = algoliaOptions.Value.IsSearchConfigured;
         _algoliaEscrituraConfigurada = algoliaOptions.Value.IsWriteConfigured;
         _logger = logger;
-    private readonly PieSocketService _pieSocketService;
-    private readonly Microsoft.Extensions.Options.IOptions<PieSocketOptions> _pieSocketOptions;
-
-    private const string SessionKey = "ProductosRecordados";
-
-    public ProductosController(ProductoService productoService, PieSocketService pieSocketService, Microsoft.Extensions.Options.IOptions<PieSocketOptions> pieSocketOptions)
-    {
-        _productoService = productoService;
         _pieSocketService = pieSocketService;
         _pieSocketOptions = pieSocketOptions;
     }
