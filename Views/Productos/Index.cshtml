@@ -92,7 +92,10 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                    <button type="button" class="btn btn-brand w-100 btn-agregar-carrito" @(producto.SinStock ? "disabled" : "")>Agregar al carrito</button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-brand flex-fill btn-agregar-carrito" @(producto.SinStock ? "disabled" : "")>Agregar al carrito</button>
+                        <button type="button" class="btn btn-sun flex-fill btn-comprar" data-producto-id="@producto.Id" @(producto.SinStock ? "disabled" : "")>Comprar</button>
+                    </div>
                     <form asp-controller="Productos" asp-action="ReducirStock" method="post" class="mt-2">
                         <input type="hidden" name="id" value="@producto.Id" />
                         <button type="submit" class="btn btn-ghost w-100 btn-reducir-stock" @(producto.SinStock ? "disabled" : "")>Reducir stock</button>
@@ -131,8 +134,10 @@
                     }
                     const agregar = card.querySelector('.btn-agregar-carrito');
                     const reducir = card.querySelector('.btn-reducir-stock');
+                    const comprar = card.querySelector('.btn-comprar');
                     if (agregar) agregar.disabled = stock <= 0;
                     if (reducir) reducir.disabled = stock <= 0;
+                    if (comprar) comprar.disabled = stock <= 0;
                 }
 
                 function conectar() {

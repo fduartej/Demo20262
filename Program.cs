@@ -34,6 +34,11 @@ builder.Services.Configure<PieSocketOptions>(builder.Configuration.GetSection(Pi
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<PieSocketService>();
 
+// Cola de pedidos (CloudAMQP): publicador + consumidor desacoplado.
+builder.Services.Configure<CloudAmqpOptions>(builder.Configuration.GetSection(CloudAmqpOptions.SectionName));
+builder.Services.AddSingleton<IOrdenPublisher, OrdenPublisher>();
+builder.Services.AddHostedService<ConsumidorOrdenesService>();
+
 var redisConfig = builder.Configuration.GetSection("Redis");
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -85,6 +90,22 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+
+    // Asegura la tabla de pedidos registrados (DDL idempotente; el proyecto no usa migraciones EF).
+    await db.Database.ExecuteSqlRawAsync("""
+        CREATE TABLE IF NOT EXISTS t_pedidos_registrados (
+            Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            OrdenId TEXT NOT NULL,
+            ProductoId INTEGER NOT NULL,
+            NombreProducto TEXT NOT NULL,
+            Precio TEXT NOT NULL,
+            Cantidad INTEGER NOT NULL,
+            Total TEXT NOT NULL,
+            CreadoEn TEXT NOT NULL,
+            RegistradoEn TEXT NOT NULL,
+            Estado TEXT NOT NULL
+        );
+        """);
 
     // Crea el usuario administrador por defecto si no existe.
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();

@@ -46,6 +46,46 @@ if (window.jQuery) {
             actualizarContador(leerRecordados());
         };
 
+        window.comprarProducto = function (id, btn) {
+            if (btn.disabled) return;
+            var original = btn.dataset.original || btn.textContent;
+            btn.dataset.original = original;
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            fetch('/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productoId: id })
+            })
+                .then(function (res) {
+                    return res.json().then(function (data) {
+                        if (!res.ok) {
+                            throw new Error(data.title || ('HTTP ' + res.status));
+                        }
+                        return data;
+                    });
+                })
+                .then(function (data) {
+                    btn.textContent = 'Pedido en cola';
+                })
+                .catch(function (err) {
+                    console.error('Error al comprar el producto ' + id, err);
+                    btn.disabled = false;
+                    btn.textContent = original;
+                });
+        };
+
+        $(function () {
+            $(document).on('click', '.btn-comprar', function () {
+                var btn = this;
+                var id = parseInt(btn.getAttribute('data-producto-id'), 10);
+                if (!isNaN(id)) {
+                    window.comprarProducto(id, btn);
+                }
+            });
+        });
+
         $(function () {
             $('form[data-recordar]').on('submit', function () {
                 var form = $(this);
