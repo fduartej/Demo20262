@@ -1,9 +1,12 @@
 ﻿<!DOCTYPE html>
 @using Microsoft.Extensions.Options
+@using _20262.Services
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IOptions<AlgoliaOptions> AlgoliaOptions
+@inject IOptions<PieSocketOptions> PieSocketOptions
 @{
     var algolia = AlgoliaOptions.Value;
+    var pieSocket = PieSocketOptions.Value;
 }
 <html lang="es">
 <head>
@@ -118,6 +121,8 @@
         @RenderBody()
     </main>
 
+    <div id="mm-toast-stack" class="mm-toast-stack" aria-live="polite"></div>
+
     <footer class="footer">
         <div class="container py-4">
             <div class="row g-3 align-items-center">
@@ -153,6 +158,53 @@
     <script src="~/lib/@@algolia/autocomplete-js/dist/umd/index.production.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/algolia-autocomplete.js" asp-append-version="true"></script>
+    @if (!string.IsNullOrEmpty(pieSocket.WebSocketUrl))
+    {
+        <script>
+            (function () {
+                function mostrarToast(data) {
+                    if (!data || !data.pedidoId) return;
+                    var stack = document.getElementById('mm-toast-stack');
+                    if (!stack) return;
+                    var toast = document.createElement('div');
+                    toast.className = 'mm-toast';
+                    var texto = 'El pedido de <strong>' + (data.nombre || 'producto') + '</strong>';
+                    if (data.total) {
+                        texto += ' por S/ ' + Number(data.total).toFixed(2);
+                    }
+                    texto += ' fue registrado.';
+                    toast.innerHTML =
+                        '<div class="mm-toast-titulo">\u2713 Pedido registrado</div>' +
+                        '<div class="mm-toast-cuerpo">' + texto + '</div>' +
+                        '<div class="mm-toast-detalle">Pedido #' + data.pedidoId + ' | Orden ' + String(data.ordenId || '').slice(0, 8) + '</div>';
+                    stack.appendChild(toast);
+                    requestAnimationFrame(function () { toast.classList.add('mm-toast-in'); });
+                    setTimeout(function () {
+                        toast.classList.remove('mm-toast-in');
+                        setTimeout(function () { toast.remove(); }, 400);
+                    }, 7000);
+                }
+
+                function conectar() {
+                    var socket = new WebSocket('@pieSocket.WebSocketUrl');
+                    socket.onmessage = function (event) {
+                        try {
+                            var msg = JSON.parse(event.data);
+                            if (msg.event !== 'orden-registrada') return;
+                            mostrarToast(msg.data);
+                        } catch (e) {
+                            console.error('PieSocket: mensaje inválido', e);
+                        }
+                    };
+                    socket.onclose = function () {
+                        setTimeout(conectar, 3000);
+                    };
+                }
+
+                conectar();
+            })();
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

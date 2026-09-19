@@ -39,6 +39,9 @@
             <button type="button" class="btn btn-brand btn-lg px-4" @(producto.SinStock ? "disabled" : "")>
                 Agregar al carrito
             </button>
+            <button type="button" class="btn btn-sun btn-lg px-4 btn-comprar" data-producto-id="@producto.Id" @(producto.SinStock ? "disabled" : "")>
+                Comprar ahora
+            </button>
             @if (SignInManager.IsSignedIn(User))
             {
                 <form asp-controller="Productos" asp-action="@(Model.Recordado ? "NoRecordar" : "Recordar")" method="post"

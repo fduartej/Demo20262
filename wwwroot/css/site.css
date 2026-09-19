@@ -553,3 +553,58 @@ a:focus-visible,
   text-align: center;
   font-size: .875rem;
 }
+
+/* ============================================================
+   Toasts (pedidos registrados vía websocket)
+   ============================================================ */
+
+.mm-toast-stack {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  max-width: min(360px, calc(100vw - 2.5rem));
+  pointer-events: none;
+}
+
+.mm-toast {
+  pointer-events: auto;
+  background: var(--forest);
+  color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lift);
+  padding: .9rem 1.1rem;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: transform .3s ease, opacity .3s ease;
+  border-left: 5px solid var(--amber);
+}
+
+.mm-toast-in {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.mm-toast-titulo {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-weight: 800;
+  color: var(--amber);
+  margin-bottom: .15rem;
+}
+
+.mm-toast-cuerpo {
+  font-size: .9rem;
+}
+
+.mm-toast-cuerpo strong {
+  color: #fff;
+}
+
+.mm-toast-detalle {
+  font-size: .75rem;
+  color: rgba(255, 255, 255, .72);
+  margin-top: .3rem;
+}

@@ -24,6 +24,48 @@ public class PieSocketService
         _logger = logger;
     }
 
+    public async Task<bool> PublicarOrdenRegistradaAsync(
+        int pedidoId,
+        Guid ordenId,
+        int productoId,
+        string nombre,
+        decimal total,
+        DateTime registradoEn,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var payload = new
+            {
+                key = _options.ApiKey,
+                secret = _options.Secret,
+                roomId = _options.RoomId,
+                message = new
+                {
+                    @event = "orden-registrada",
+                    data = new { pedidoId, ordenId, productoId, nombre, total, registradoEn }
+                }
+            };
+
+            using var client = _httpClientFactory.CreateClient();
+            using var content = new StringContent(JsonSerializer.Serialize(payload, JsonOptions), System.Text.Encoding.UTF8, "application/json");
+            using var response = await client.PostAsync($"https://{_options.ClusterId}.piesocket.com/api/publish", content, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("PieSocket: no se pudo publicar la orden registrada (HTTP {Status}).", (int)response.StatusCode);
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "PieSocket: error al publicar la orden registrada {OrdenId}.", ordenId);
+            return false;
+        }
+    }
+
     public async Task<bool> PublicarStockReducidoAsync(int productoId, int stock, CancellationToken cancellationToken = default)
     {
         try
