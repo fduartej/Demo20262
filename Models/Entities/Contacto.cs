@@ -24,4 +24,11 @@ public class Contacto
     public string Message { get; set; } = string.Empty;
 
     public DateTime FechaRegistro { get; set; } = DateTime.Now;
+
+    /// <summary>Sentimiento predicho por el modelo de ML.NET: "Positivo" o "Negativo" (null si no se clasificó).</summary>
+    [StringLength(20)]
+    public string? Sentimiento { get; set; }
+
+    /// <summary>Probabilidad (0-1) de la clase predicha por el modelo.</summary>
+    public double? ProbabilidadSentimiento { get; set; }
 }

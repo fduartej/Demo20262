@@ -1,5 +1,7 @@
+using System.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.OpenApi;
 using _20262.Data;
@@ -30,6 +32,10 @@ builder.Services.AddSwaggerGen(options =>
 // Caché distribuida (Redis) para el catálogo de productos.
 builder.Services.Configure<CatalogCacheOptions>(builder.Configuration.GetSection(CatalogCacheOptions.SectionName));
 builder.Services.Configure<PieSocketOptions>(builder.Configuration.GetSection(PieSocketOptions.SectionName));
+
+// Análisis de sentimiento de los mensajes de contacto (ML.NET): singleton porque el modelo se entrena una vez.
+builder.Services.Configure<SentimentOptions>(builder.Configuration.GetSection(SentimentOptions.SectionName));
+builder.Services.AddSingleton<ISentimentAnalysisService, SentimentAnalysisService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<PieSocketService>();
@@ -62,7 +68,10 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        // El proyecto no usa migraciones EF: el esquema se ajusta con DDL idempotente al arrancar.
+        // Sin esta excepción, Migrate() aborta el arranque cuando el modelo cambia sin migración nueva.
+        .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -107,6 +116,42 @@ using (var scope = app.Services.CreateScope())
         );
         """);
 
+    // Agrega las columnas de sentimiento a t_contactos (SQLite no soporta ADD COLUMN IF NOT EXISTS).
+    var columnasContacto = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    var conexion = db.Database.GetDbConnection();
+    var conexionPrevia = conexion.State == ConnectionState.Open;
+    if (!conexionPrevia)
+    {
+        await conexion.OpenAsync();
+    }
+
+    await using (var comando = conexion.CreateCommand())
+    {
+        comando.CommandText = "PRAGMA table_info(t_contactos);";
+        await using var reader = await comando.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            columnasContacto.Add(reader.GetString(1));
+        }
+    }
+
+    if (!conexionPrevia)
+    {
+        await conexion.CloseAsync();
+    }
+
+    if (!columnasContacto.Contains(nameof(Contacto.Sentimiento)))
+    {
+        await db.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE t_contactos ADD COLUMN Sentimiento TEXT NULL;");
+    }
+
+    if (!columnasContacto.Contains(nameof(Contacto.ProbabilidadSentimiento)))
+    {
+        await db.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE t_contactos ADD COLUMN ProbabilidadSentimiento REAL NULL;");
+    }
+
     // Crea el usuario administrador por defecto si no existe.
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     const string adminEmail = "admin@mundomascota.com";
@@ -133,6 +178,13 @@ using (var scope = app.Services.CreateScope())
     // Precarga el catálogo en Redis en el arranque (si WarmupOnStartup está activo).
     var productoService = scope.ServiceProvider.GetRequiredService<ProductoService>();
     await productoService.PrecalentarCacheAsync();
+
+    // Carga (o entrena la primera vez) el modelo de análisis de sentimiento de ML.NET.
+    var sentimentService = scope.ServiceProvider.GetRequiredService<ISentimentAnalysisService>();
+    if (sentimentService.EstaHabilitado)
+    {
+        await sentimentService.InicializarAsync();
+    }
 }
 
 // Configure the HTTP request pipeline.
