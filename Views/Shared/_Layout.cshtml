@@ -88,6 +88,9 @@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
+                                <a class="nav-link @NavActive("Recomendaciones")" asp-area="" asp-controller="Recomendaciones" asp-action="Index">Recomendados</a>
+                            </li>
+                            <li class="nav-item">
                                 <span class="nav-link" style="cursor: default;">Hola, @User.Identity?.Name</span>
                             </li>
                             <li class="nav-item">

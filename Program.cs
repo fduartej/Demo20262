@@ -37,6 +37,10 @@ builder.Services.Configure<PieSocketOptions>(builder.Configuration.GetSection(Pi
 builder.Services.Configure<SentimentOptions>(builder.Configuration.GetSection(SentimentOptions.SectionName));
 builder.Services.AddSingleton<ISentimentAnalysisService, SentimentAnalysisService>();
 
+// Recomendación de productos por factorización de matrices (ML.NET): singleton porque el modelo se entrena una vez.
+builder.Services.Configure<RecommendationOptions>(builder.Configuration.GetSection(RecommendationOptions.SectionName));
+builder.Services.AddSingleton<IRecommendationService, RecommendationService>();
+
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<PieSocketService>();
 
@@ -184,6 +188,13 @@ using (var scope = app.Services.CreateScope())
     if (sentimentService.EstaHabilitado)
     {
         await sentimentService.InicializarAsync();
+    }
+
+    // Carga (o entrena la primera vez) el modelo de recomendación de productos de ML.NET.
+    var recommendationService = scope.ServiceProvider.GetRequiredService<IRecommendationService>();
+    if (recommendationService.EstaHabilitado)
+    {
+        await recommendationService.InicializarAsync();
     }
 }
 

@@ -1,0 +1,127 @@
+@model RecomendacionesViewModel
+@using _20262.Services
+@inject IRecommendationService RecomendacionService
+@{
+    ViewData["Title"] = "Recomendaciones";
+    var metricas = Model.Metricas;
+}
+
+<div class="page-head">
+    <span class="eyebrow">Sesión</span>
+    <h1 class="display-4 mt-2 mb-2">Productos recomendados para ti</h1>
+    <p>
+        Seleccionados con un modelo de <strong>factorización de matrices</strong> (ML.NET) entrenado sobre
+        <code>product_ratings_simple_10k.csv</code>: tú eres la fila, el producto es la columna y la
+        <strong>rating</strong> es lo que el modelo aprende a predecir <em>(1-5)</em>.
+    </p>
+</div>
+
+@if (TempData["RecomendacionOk"] is string ok)
+{
+    <div class="alert alert-success" role="alert">@ok</div>
+}
+@if (TempData["RecomendacionError"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (Model.ModeloListo)
+{
+    <div class="d-flex flex-wrap align-items-end gap-3 mt-3">
+        <div class="flex-grow-1">
+            @if (Model.UsuarioConocido)
+            {
+                <p class="mb-1">
+                    Encontramos tu historial en el dataset: el modelo predijo tus calificaciones
+                    para cada producto y ordenó del mayor al menor puntaje.
+                </p>
+            }
+            else
+            {
+                <p class="mb-1">
+                    Tu usuario no aparece en el dataset de entrenamiento, así que el modelo no puede
+                    predecir tus gustos. Te mostramos los <strong>mejor valorados</strong> según el promedio
+                    del dataset <em>(arranque en frío)</em>.
+                </p>
+            }
+            <span class="text-muted small">Mostrando los @Model.Recomendaciones.Count mejores de @Model.TopK solicitados.</span>
+        </div>
+        <form asp-controller="Recomendaciones" asp-action="Reentrenar" method="post" class="ms-lg-auto">
+            <button type="submit" class="btn btn-ghost"
+                    onclick="return confirm('¿Reentrenar el modelo de recomendación con el dataset actual?');">
+                Reentrenar modelo
+            </button>
+        </form>
+    </div>
+}
+else
+{
+    <div class="card p-5 text-center mt-3">
+        <p class="mb-2 fs-4">El modelo de recomendación no está disponible.</p>
+        <p class="text-muted mb-0">Verifica el log y la configuración <code>Recomendacion</code> en appsettings.</p>
+    </div>
+}
+
+@if (!Model.Recomendaciones.Any())
+{
+    <div class="card p-5 text-center mt-3">
+        <p class="mb-2 fs-4">No hay recomendaciones para mostrar.</p>
+        <p class="text-muted mb-0">El catálogo no tiene productos relacionados con el dataset de ratings.</p>
+        <a asp-controller="Productos" asp-action="Index" class="btn btn-brand mt-3 d-inline-block mx-auto">Ir al catálogo</a>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 mt-1">
+        @foreach (var item in Model.Recomendaciones)
+        {
+            var producto = item.Producto;
+            <div class="col">
+                <div class="card card-hover product-card h-100 overflow-hidden position-relative">
+                    <span class="badge-cat">@producto.Categoria?.Nombre</span>
+                    <span class="badge rounded-pill" style="position:absolute; top:10px; right:10px; z-index:2; background: var(--amber); color: #fff; font-weight: 700;">
+                        @item.Score.ToString("0.0") / 5
+                    </span>
+                    <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre" loading="lazy" />
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@producto.Nombre</h5>
+                        <p class="card-text text-muted flex-grow-1">@producto.Descripcion</p>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="price-pill">S/ @producto.Precio.ToString("0.00")</span>
+                            <span class="small text-muted">@(producto.SinStock ? "Sin stock" : $"Stock: {producto.Stock}")</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                        <a asp-controller="Productos" asp-action="Detalle" asp-route-id="@producto.Id"
+                           class="btn btn-brand w-100">Ver detalle</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="card p-4 mt-4">
+    <h2 class="h6 fw-bold mb-2">Modelo de recomendación (ML.NET)</h2>
+    <p class="mb-0 small" style="color: var(--muted);">
+        Dataset: <code>ML/recomendacionProductos/trainingdata/product_ratings_simple_10k.csv</code>
+        · Modelo: <code>@System.IO.Path.GetFileName(RecomendacionService.ModelPath)</code>
+        @if (Model.ModeloListo)
+        {
+            <text>· Cargado en memoria</text>
+        }
+        else
+        {
+            <text>· No disponible</text>
+        }
+        @if (metricas is not null)
+        {
+            <text>
+                · @metricas.EjemplosTotales ratings (@metricas.Usuarios usuarios / @metricas.Productos productos)
+                · RMSE @metricas.Rms.ToString("0.0000")
+                · R² @(metricas.R2?.ToString("0.0000") ?? "-")
+                · Entrenado el @metricas.FechaEntrenamiento.ToString("dd/MM/yyyy HH:mm")
+            </text>
+        }
+    </p>
+</div>
