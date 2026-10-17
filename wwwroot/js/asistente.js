@@ -1,6 +1,10 @@
 // Asistente de la tienda (widget flotante). Respuestas en streaming desde /Asistente/Preguntar.
+// El flujo combina texto (la respuesta del agente) con mensajes de control entre el carácter STX:
+// { fuentes, contexto, productos }. Los productos se dibujan como tarjetas.
 (function () {
     'use strict';
+
+    var DELIMITADOR = '\u0002';
 
     var root = document.getElementById('mm-asistente');
     if (!root) {
@@ -55,8 +59,8 @@
     function bienvenida() {
         var div = document.createElement('div');
         div.className = 'mm-asistente-bienvenida';
-        div.textContent = 'Hola, soy el asistente de Mundo Mascota. Pregúntame sobre productos, pedidos, '
-            + 'envíos, recomendaciones o servicios de la tienda.';
+        div.textContent = 'Hola, soy el asistente de Mundo Mascota. Pregúntame por la tienda, por el '
+            + 'tipo de cambio del dólar o por el precio y el stock de un producto.';
         return div;
     }
 
@@ -77,27 +81,94 @@
         }
     }
 
-    function mostrarFuentes(linea, bot) {
-        var meta;
-        try {
-            meta = JSON.parse(linea);
-        } catch (e) {
-            return;
-        }
-
+    function mostrarFuentes(meta, bot) {
         var aviso = document.createElement('div');
         aviso.className = 'mm-fuentes';
 
-        if (!meta.contexto) {
+        if (meta.fuentes && meta.fuentes.length) {
+            aviso.textContent = 'Fuentes: ' + meta.fuentes.join(', ');
+        } else if (meta.contexto) {
             aviso.classList.add('mm-fuentes-aviso');
             aviso.textContent = '\u26A0 Sin coincidencias en la base de conocimiento de la tienda.';
-        } else if (meta.fuentes && meta.fuentes.length) {
-            aviso.textContent = 'Fuentes: ' + meta.fuentes.join(', ');
         } else {
             return;
         }
 
         bot.insertAdjacentElement('afterend', aviso);
+        abajo();
+    }
+
+    function crearTarjeta(producto) {
+        var tarjeta = document.createElement('article');
+        tarjeta.className = 'mm-card';
+
+        if (producto.imagenUrl) {
+            var imagen = document.createElement('img');
+            imagen.className = 'mm-card-img';
+            imagen.src = producto.imagenUrl;
+            imagen.alt = producto.nombre || 'Producto';
+            imagen.loading = 'lazy';
+            imagen.addEventListener('error', function () {
+                imagen.remove();
+            });
+            tarjeta.appendChild(imagen);
+        }
+
+        var cuerpo = document.createElement('div');
+        cuerpo.className = 'mm-card-cuerpo';
+
+        if (producto.categoria) {
+            var categoria = document.createElement('span');
+            categoria.className = 'mm-card-cat';
+            categoria.textContent = producto.categoria;
+            cuerpo.appendChild(categoria);
+        }
+
+        var nombre = document.createElement('h4');
+        nombre.className = 'mm-card-nombre';
+        nombre.textContent = producto.nombre || 'Producto';
+        cuerpo.appendChild(nombre);
+
+        var precio = document.createElement('div');
+        precio.className = 'mm-card-precio';
+        precio.textContent = 'S/ ' + Number(producto.precio || 0).toFixed(2);
+        cuerpo.appendChild(precio);
+
+        var stock = Number(producto.stock);
+        var disponibilidad = document.createElement('span');
+        disponibilidad.className = 'mm-card-stock ' + (stock > 0 ? 'mm-card-stock-ok' : 'mm-card-stock-agotado');
+        disponibilidad.textContent = stock > 0
+            ? 'Stock: ' + stock + (stock === 1 ? ' unidad' : ' unidades')
+            : 'Sin stock por el momento';
+        cuerpo.appendChild(disponibilidad);
+
+        if (producto.descripcion) {
+            var descripcion = document.createElement('p');
+            descripcion.className = 'mm-card-desc';
+            descripcion.textContent = producto.descripcion;
+            cuerpo.appendChild(descripcion);
+        }
+
+        if (producto.id) {
+            var enlace = document.createElement('a');
+            enlace.className = 'mm-card-link';
+            enlace.href = '/Productos/Detalle/' + encodeURIComponent(producto.id);
+            enlace.textContent = 'Ver producto';
+            cuerpo.appendChild(enlace);
+        }
+
+        tarjeta.appendChild(cuerpo);
+        return tarjeta;
+    }
+
+    function mostrarTarjetas(productos) {
+        if (!productos || !productos.length) {
+            return;
+        }
+
+        productos.forEach(function (producto) {
+            lista.appendChild(crearTarjeta(producto));
+        });
         abajo();
     }
 
@@ -172,58 +243,113 @@
 
                 var lector = respuesta.body.getReader();
                 var decoder = new TextDecoder();
+
                 var pendiente = '';
-                var acumulado = '';
-                var metaLeida = false;
-                var primero = true;
+                var visible = '';
+                var indicador = true;
+                var control = false;
 
-                function volcar() {
-                    if (!pendiente) {
-                        return;
-                    }
-
-                    if (primero) {
+                function limpiarIndicador() {
+                    if (indicador) {
                         bot.innerHTML = '';
-                        primero = false;
+                        indicador = false;
                     }
+                }
 
-                    acumulado += pendiente;
-                    pendiente = '';
-                    bot.textContent = acumulado;
+                function pintar() {
+                    bot.textContent = visible;
                     abajo();
                 }
 
-                function empujar(trozo) {
-                    pendiente += trozo;
-
-                    if (!metaLeida) {
-                        var salto = pendiente.indexOf('\n');
-                        if (salto === -1) {
-                            return;
-                        }
-
-                        var linea = pendiente.slice(0, salto);
-                        pendiente = pendiente.slice(salto + 1);
-                        metaLeida = true;
-                        mostrarFuentes(linea, bot);
+                function procesarControl(payload) {
+                    var meta;
+                    try {
+                        meta = JSON.parse(payload);
+                    } catch (e) {
+                        return;
                     }
 
+                    control = true;
+                    limpiarIndicador();
+                    mostrarFuentes(meta, bot);
+                    mostrarTarjetas(meta.productos);
+                }
+
+                // Extrae del búfer los mensajes de control completos y devuelve solo el texto visible.
+                function depurar() {
+                    var salida = '';
+
+                    while (true) {
+                        var inicio = pendiente.indexOf(DELIMITADOR);
+                        if (inicio < 0) {
+                            salida += pendiente;
+                            pendiente = '';
+                            break;
+                        }
+
+                        salida += pendiente.slice(0, inicio);
+
+                        var fin = pendiente.indexOf(DELIMITADOR, inicio + 1);
+                        if (fin < 0) {
+                            // Mensaje de control incompleto: se espera al siguiente fragmento.
+                            pendiente = pendiente.slice(inicio);
+                            break;
+                        }
+
+                        procesarControl(pendiente.slice(inicio + 1, fin));
+                        pendiente = pendiente.slice(fin + 1);
+                    }
+
+                    return salida;
+                }
+
+                function volcar() {
+                    var textoNuevo = depurar();
+                    if (!textoNuevo) {
+                        return;
+                    }
+
+                    limpiarIndicador();
+                    visible += textoNuevo;
+                    pintar();
+                }
+
+                function finalizar() {
                     volcar();
+
+                    var resto = pendiente.indexOf(DELIMITADOR);
+                    if (resto >= 0) {
+                        pendiente = pendiente.slice(0, resto);
+                    }
+                    if (pendiente) {
+                        limpiarIndicador();
+                        visible += pendiente;
+                        pendiente = '';
+                        pintar();
+                    }
+
+                    if (!visible) {
+                        if (control) {
+                            // Solo llegaron tarjetas o fuentes: la burbuja de texto vacía no aporta nada.
+                            bot.remove();
+                        } else {
+                            bot.classList.add('mm-msg-error');
+                            bot.textContent = 'No obtuve respuesta del asistente. Intenta nuevamente.';
+                        }
+                    }
+
+                    abajo();
                 }
 
                 function leer() {
                     return lector.read().then(function (resultado) {
                         if (resultado.done) {
-                            volcar();
-                            if (primero) {
-                                bot.classList.add('mm-msg-error');
-                                bot.textContent = 'No obtuve respuesta del asistente. Intenta nuevamente.';
-                                abajo();
-                            }
+                            finalizar();
                             return;
                         }
 
-                        empujar(decoder.decode(resultado.value, { stream: true }));
+                        pendiente += decoder.decode(resultado.value, { stream: true });
+                        volcar();
                         return leer();
                     });
                 }

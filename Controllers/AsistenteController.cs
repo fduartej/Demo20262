@@ -9,8 +9,9 @@ using _20262.Services;
 namespace _20262.Controllers;
 
 /// <summary>
-/// Asistente de la tienda. Disponible para cualquier visitante (admin o sin sesión): recupera
-/// información de la base de conocimiento en Qdrant y responde con Groq en streaming.
+/// Asistente de la tienda. Disponible para cualquier visitante (admin o sin sesión): envía la pregunta
+/// al agente de Semantic Kernel (base de conocimiento en Qdrant, tipo de cambio y catálogo de productos)
+/// y transmite la respuesta en streaming junto con su mensaje de control (fuentes y tarjetas de producto).
 /// </summary>
 [AllowAnonymous]
 public class AsistenteController : Controller
@@ -30,7 +31,7 @@ public class AsistenteController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task Preguntar([FromBody] PreguntaAsistenteRequest peticion, CancellationToken cancellationToken)
+    public async Task Preguntar([FromBody] PreguntaAsistenteRequest? peticion, CancellationToken cancellationToken)
     {
         Response.ContentType = "text/plain; charset=utf-8";
         Response.Headers.CacheControl = "no-cache";
@@ -41,7 +42,7 @@ public class AsistenteController : Controller
             return;
         }
 
-        var pregunta = peticion.Mensaje?.Trim() ?? string.Empty;
+        var pregunta = peticion?.Mensaje?.Trim() ?? string.Empty;
         if (pregunta.Length == 0)
         {
             await Response.WriteAsync("Escribe una pregunta sobre la tienda.", cancellationToken);
@@ -63,20 +64,10 @@ public class AsistenteController : Controller
         }
 
         var respuesta = new StringBuilder();
-        var metadatosEnviados = false;
 
         try
         {
             var resultado = await _asistente.ResponderAsync(historial, pregunta, cancellationToken);
-
-            var metadatos = JsonSerializer.Serialize(new
-            {
-                fuentes = resultado.Fuentes,
-                contexto = resultado.HayContexto
-            });
-            await Response.WriteAsync(metadatos + "\n", cancellationToken);
-            await Response.Body.FlushAsync(cancellationToken);
-            metadatosEnviados = true;
 
             await foreach (var fragmento in resultado.Fragmentos)
             {
@@ -95,11 +86,6 @@ public class AsistenteController : Controller
 
             if (respuesta.Length == 0)
             {
-                if (!metadatosEnviados)
-                {
-                    await Response.WriteAsync("{\"fuentes\":[],\"contexto\":false}\n", cancellationToken);
-                }
-
                 await Response.WriteAsync(
                     "Lo siento, ocurrió un error al generar la respuesta. Intenta nuevamente.", cancellationToken);
             }
@@ -109,7 +95,8 @@ public class AsistenteController : Controller
 
         if (respuesta.Length > 0)
         {
-            GuardarHistorial(historial, pregunta, respuesta.ToString());
+            // El historial guarda solo el texto: los mensajes de control (fuentes y tarjetas) no son del modelo.
+            GuardarHistorial(historial, pregunta, ProtocoloChatAsistente.Limpiar(respuesta.ToString()));
         }
     }
 

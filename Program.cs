@@ -11,6 +11,7 @@ using _20262.Integrations.Groq;
 using _20262.Integrations.Qdrant;
 using _20262.Models.Entities;
 using _20262.Services;
+using _20262.Services.Agente;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,12 +32,23 @@ builder.Services.AddHttpClient<IKnowledgeBaseService, QdrantKnowledgeService>(cl
     client.Timeout = TimeSpan.FromSeconds(100);
 });
 
-// Asistente de la tienda para visitantes anónimos y usuarios: RAG (Qdrant) + Groq en streaming.
+// Cliente del modelo de Groq (compatible con la API de OpenAI).
 builder.Services.AddHttpClient<IGroqChatService, GroqChatService>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(120);
 });
-builder.Services.AddScoped<IAsistenteTiendaService, AsistenteTiendaService>();
+
+// Agente de la tienda con Semantic Kernel: function calling sobre Groq con herramientas para la base
+// de conocimiento (Qdrant), el tipo de cambio (Frankfurter) y el catálogo de productos (t_productos).
+builder.Services.AddScoped<SesionAgente>();
+builder.Services.AddScoped<ConocimientoPlugin>();
+builder.Services.AddScoped<ProductosPlugin>();
+builder.Services.AddHttpClient<TipoCambioPlugin>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["TipoCambio:BaseUrl"] ?? "https://api.frankfurter.dev/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+builder.Services.AddScoped<IAsistenteTiendaService, AgenteTiendaService>();
 
 builder.Services.AddSwaggerGen(options =>
 {

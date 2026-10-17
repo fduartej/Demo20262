@@ -762,6 +762,92 @@ a:focus-visible,
   font-weight: 700;
 }
 
+/* ---- Tarjetas de producto del asistente ---- */
+
+.mm-card {
+  align-self: flex-start;
+  width: 92%;
+  max-width: 320px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.mm-card-img {
+  display: block;
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  background: var(--mint);
+}
+
+.mm-card-cuerpo {
+  padding: .7rem .85rem .8rem;
+}
+
+.mm-card-cat {
+  display: inline-block;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+}
+
+.mm-card-nombre {
+  margin: .15rem 0 .45rem;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.mm-card-precio {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--forest);
+}
+
+.mm-card-stock {
+  display: inline-block;
+  margin-top: .35rem;
+  padding: .2rem .6rem;
+  border-radius: 99px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.mm-card-stock-ok {
+  background: var(--mint);
+  color: var(--forest);
+}
+
+.mm-card-stock-agotado {
+  background: #FDECEA;
+  color: #8A2B22;
+}
+
+.mm-card-desc {
+  margin: .55rem 0 0;
+  font-size: .8rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.mm-card-link {
+  display: inline-block;
+  margin-top: .6rem;
+  font-size: .78rem;
+  font-weight: 800;
+  color: var(--forest);
+  text-decoration: none;
+}
+
+.mm-card-link:hover {
+  text-decoration: underline;
+}
+
 .mm-asistente-form {
   display: flex;
   gap: .5rem;
