@@ -46,6 +46,18 @@
         }
     }
 
+    function escaparHtml(texto) {
+        return texto
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    // Convierte el marcado ligero del agente (**negrita**) en HTML, escapando primero el texto.
+    function formatoTexto(texto) {
+        return escaparHtml(texto).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    }
+
     function burbuja(texto, tipo) {
         var div = document.createElement('div');
         div.className = 'mm-msg ' + tipo;
@@ -161,14 +173,81 @@
         return tarjeta;
     }
 
+    function botonCarrusel(direccion) {
+        var boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'mm-carrusel-btn mm-carrusel-' + direccion;
+        boton.setAttribute('aria-label', direccion === 'anterior' ? 'Producto anterior' : 'Producto siguiente');
+        boton.textContent = direccion === 'anterior' ? '\u2039' : '\u203A';
+        return boton;
+    }
+
+    function crearCarrusel(productos) {
+        var carrusel = document.createElement('div');
+        carrusel.className = 'mm-carrusel';
+
+        var pista = document.createElement('div');
+        pista.className = 'mm-carrusel-pista';
+
+        productos.forEach(function (producto) {
+            pista.appendChild(crearTarjeta(producto));
+        });
+        carrusel.appendChild(pista);
+
+        if (productos.length < 2) {
+            return carrusel;
+        }
+
+        var puntos = document.createElement('div');
+        puntos.className = 'mm-carrusel-puntos';
+
+        var marcas = productos.map(function (_, indice) {
+            var marca = document.createElement('button');
+            marca.type = 'button';
+            marca.className = 'mm-carrusel-punto';
+            marca.setAttribute('aria-label', 'Ir al producto ' + (indice + 1));
+            marca.addEventListener('click', function () {
+                pista.scrollTo({ left: pista.clientWidth * indice, behavior: 'smooth' });
+            });
+            puntos.appendChild(marca);
+            return marca;
+        });
+
+        function desplazar(paso) {
+            pista.scrollBy({ left: pista.clientWidth * paso, behavior: 'smooth' });
+        }
+
+        var anterior = botonCarrusel('anterior');
+        var siguiente = botonCarrusel('siguiente');
+        anterior.addEventListener('click', function () { desplazar(-1); });
+        siguiente.addEventListener('click', function () { desplazar(1); });
+
+        function actualizarPuntos() {
+            var indice = Math.round(pista.scrollLeft / Math.max(pista.clientWidth, 1));
+            marcas.forEach(function (marca, posicion) {
+                marca.classList.toggle('mm-carrusel-punto-activo', posicion === indice);
+            });
+        }
+
+        pista.addEventListener('scroll', function () {
+            window.clearTimeout(pista._mmTemporizador);
+            pista._mmTemporizador = window.setTimeout(actualizarPuntos, 90);
+        });
+
+        carrusel.appendChild(anterior);
+        carrusel.appendChild(siguiente);
+        carrusel.appendChild(puntos);
+        actualizarPuntos();
+
+        return carrusel;
+    }
+
     function mostrarTarjetas(productos) {
         if (!productos || !productos.length) {
             return;
         }
 
-        productos.forEach(function (producto) {
-            lista.appendChild(crearTarjeta(producto));
-        });
+        lista.appendChild(crearCarrusel(productos));
         abajo();
     }
 
@@ -257,7 +336,7 @@
                 }
 
                 function pintar() {
-                    bot.textContent = visible;
+                    bot.innerHTML = formatoTexto(visible);
                     abajo();
                 }
 
