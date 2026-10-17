@@ -1,0 +1,67 @@
+@using Microsoft.Extensions.Options
+@using _20262.Integrations.Groq
+@inject IOptions<GroqOptions> GroqOptions
+@{
+    var groq = GroqOptions.Value;
+}
+
+<div id="mm-asistente" class="mm-asistente"
+     data-disponible="@(groq.EstaConfigurado ? "1" : "0")"
+     data-modelo="@groq.Model">
+    <form class="d-none" aria-hidden="true">@Html.AntiForgeryToken()</form>
+
+    <button id="mm-asistente-toggle" class="mm-asistente-toggle" type="button"
+            aria-label="Abrir el asistente de la tienda" aria-expanded="false">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5Z" />
+        </svg>
+    </button>
+
+    <section id="mm-asistente-panel" class="mm-asistente-panel" hidden aria-label="Asistente de la tienda">
+        <header class="mm-asistente-head">
+            <div>
+                <span class="mm-asistente-titulo">Asistente Mundo Mascota</span>
+                <span class="mm-asistente-sub">@(groq.EstaConfigurado ? groq.Model : "Sin configurar")</span>
+            </div>
+            <div class="d-flex gap-1">
+                <button id="mm-asistente-limpiar" class="mm-asistente-icon" type="button" title="Nueva conversación"
+                        aria-label="Nueva conversación">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                        <path d="M3 3v5h5" />
+                    </svg>
+                </button>
+                <button id="mm-asistente-cerrar" class="mm-asistente-icon" type="button" title="Cerrar"
+                        aria-label="Cerrar asistente">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div id="mm-asistente-mensajes" class="mm-asistente-mensajes" role="log" aria-live="polite">
+            <div class="mm-asistente-bienvenida">
+                Hola, soy el asistente de Mundo Mascota. Pregúntame sobre productos, pedidos, envíos,
+                recomendaciones o servicios de la tienda.
+            </div>
+        </div>
+
+        <form id="mm-asistente-form" class="mm-asistente-form">
+            <input id="mm-asistente-input" type="text" autocomplete="off"
+                   placeholder="Escribe tu pregunta..." aria-label="Pregunta para el asistente"
+                   @(groq.EstaConfigurado ? "" : "disabled") />
+            <button type="submit" @(groq.EstaConfigurado ? "" : "disabled")>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 2 11 13" />
+                    <path d="M22 2 15 22l-4-9-9-4Z" />
+                </svg>
+            </button>
+        </form>
+    </section>
+</div>

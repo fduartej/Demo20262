@@ -7,6 +7,8 @@ using Microsoft.OpenApi;
 using _20262.Data;
 using _20262.Integrations;
 using _20262.Integrations.Algolia;
+using _20262.Integrations.Groq;
+using _20262.Integrations.Qdrant;
 using _20262.Models.Entities;
 using _20262.Services;
 
@@ -19,6 +21,23 @@ builder.Services.AddControllersWithViews();
 builder.Services.Configure<AlgoliaOptions>(builder.Configuration.GetSection(AlgoliaOptions.SectionName));
 builder.Services.AddScoped<IAlgoliaSearchService, AlgoliaSearchService>();
 builder.Services.AddScoped<IAlgoliaIndexService, AlgoliaIndexService>();
+
+// Base de conocimiento de la tienda (Qdrant Cloud): alimenta al futuro agente de Groq.
+// El endpoint y la clave se resuelven por petición; la configuración Groq queda lista para el agente.
+builder.Services.Configure<GroqOptions>(builder.Configuration.GetSection(GroqOptions.SectionName));
+builder.Services.Configure<QdrantOptions>(builder.Configuration.GetSection(QdrantOptions.SectionName));
+builder.Services.AddHttpClient<IKnowledgeBaseService, QdrantKnowledgeService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(100);
+});
+
+// Asistente de la tienda para visitantes anónimos y usuarios: RAG (Qdrant) + Groq en streaming.
+builder.Services.AddHttpClient<IGroqChatService, GroqChatService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(120);
+});
+builder.Services.AddScoped<IAsistenteTiendaService, AsistenteTiendaService>();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
