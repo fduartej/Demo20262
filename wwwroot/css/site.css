@@ -848,6 +848,93 @@ a:focus-visible,
   text-decoration: underline;
 }
 
+/* ---- Carrusel de productos del asistente ---- */
+
+.mm-carrusel {
+  align-self: stretch;
+  position: relative;
+  width: 100%;
+}
+
+.mm-carrusel-pista {
+  display: flex;
+  gap: .6rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: .15rem .15rem .55rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mm-carrusel-pista::-webkit-scrollbar {
+  display: none;
+}
+
+.mm-carrusel .mm-card {
+  flex: 0 0 78%;
+  width: 78%;
+  max-width: none;
+  align-self: stretch;
+  scroll-snap-align: start;
+}
+
+.mm-carrusel-btn {
+  position: absolute;
+  top: 66px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--forest);
+  font-size: 1.1rem;
+  line-height: 1;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  z-index: 2;
+  transition: background .2s ease;
+}
+
+.mm-carrusel-btn:hover {
+  background: var(--mint);
+}
+
+.mm-carrusel-anterior {
+  left: 6px;
+}
+
+.mm-carrusel-siguiente {
+  right: 6px;
+}
+
+.mm-carrusel-puntos {
+  display: flex;
+  justify-content: center;
+  gap: .35rem;
+  margin-top: .1rem;
+}
+
+.mm-carrusel-punto {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--line);
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.mm-carrusel-punto-activo {
+  background: var(--forest);
+  transform: scale(1.2);
+}
+
 .mm-asistente-form {
   display: flex;
   gap: .5rem;
