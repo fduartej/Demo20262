@@ -106,6 +106,11 @@
                                         Reporte contactos
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @NavActive("Conocimiento")" asp-area="" asp-controller="Conocimiento" asp-action="Index">
+                                        Conocimiento
+                                    </a>
+                                </li>
                             }
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
@@ -133,6 +138,8 @@
     </main>
 
     <div id="mm-toast-stack" class="mm-toast-stack" aria-live="polite"></div>
+
+    <partial name="_AsistenteChat" />
 
     <footer class="footer">
         <div class="container py-4">
@@ -169,6 +176,7 @@
     <script src="~/lib/@@algolia/autocomplete-js/dist/umd/index.production.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/algolia-autocomplete.js" asp-append-version="true"></script>
+    <script src="~/js/asistente.js" asp-append-version="true"></script>
     @if (!string.IsNullOrEmpty(pieSocket.WebSocketUrl))
     {
         <script>

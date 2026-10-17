@@ -7,8 +7,11 @@ using Microsoft.OpenApi;
 using _20262.Data;
 using _20262.Integrations;
 using _20262.Integrations.Algolia;
+using _20262.Integrations.Groq;
+using _20262.Integrations.Qdrant;
 using _20262.Models.Entities;
 using _20262.Services;
+using _20262.Services.Agente;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,34 @@ builder.Services.AddControllersWithViews();
 builder.Services.Configure<AlgoliaOptions>(builder.Configuration.GetSection(AlgoliaOptions.SectionName));
 builder.Services.AddScoped<IAlgoliaSearchService, AlgoliaSearchService>();
 builder.Services.AddScoped<IAlgoliaIndexService, AlgoliaIndexService>();
+
+// Base de conocimiento de la tienda (Qdrant Cloud): alimenta al futuro agente de Groq.
+// El endpoint y la clave se resuelven por petición; la configuración Groq queda lista para el agente.
+builder.Services.Configure<GroqOptions>(builder.Configuration.GetSection(GroqOptions.SectionName));
+builder.Services.Configure<QdrantOptions>(builder.Configuration.GetSection(QdrantOptions.SectionName));
+builder.Services.AddHttpClient<IKnowledgeBaseService, QdrantKnowledgeService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(100);
+});
+
+// Cliente del modelo de Groq (compatible con la API de OpenAI).
+builder.Services.AddHttpClient<IGroqChatService, GroqChatService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(120);
+});
+
+// Agente de la tienda con Semantic Kernel: function calling sobre Groq con herramientas para la base
+// de conocimiento (Qdrant), el tipo de cambio (Frankfurter) y el catálogo de productos (t_productos).
+builder.Services.AddScoped<SesionAgente>();
+builder.Services.AddScoped<ConocimientoPlugin>();
+builder.Services.AddScoped<ProductosPlugin>();
+builder.Services.AddHttpClient<TipoCambioPlugin>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["TipoCambio:BaseUrl"] ?? "https://api.frankfurter.dev/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+builder.Services.AddScoped<IAsistenteTiendaService, AgenteTiendaService>();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo

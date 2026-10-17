@@ -1,0 +1,213 @@
+@model ConocimientoViewModel
+@using _20262.Integrations.Qdrant
+@{
+    ViewData["Title"] = "Base de conocimiento";
+}
+
+<div class="page-head">
+    <span class="eyebrow">Panel de administración</span>
+    <h1 class="display-4 mt-2 mb-2">Base de conocimiento</h1>
+    <p>
+        Carga documentos de la tienda en formato Markdown, texto o PDF. El contenido se fragmenta y se
+        indexa en Qdrant Cloud para que el agente de Groq pueda responder con información propia del negocio.
+    </p>
+</div>
+
+@if (TempData["ConocimientoOk"] is string ok)
+{
+    <div class="alert alert-success" role="alert">@ok</div>
+}
+@if (TempData["ConocimientoError"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (!Model.QdrantConfigurado)
+{
+    <div class="alert alert-warning" role="alert">
+        Qdrant no está configurado. Completa las claves <code>Endpoint</code>, <code>ApiKey</code> y
+        <code>CollectionName</code> en la sección <code>Qdrant</code> de <code>appsettings.json</code>.
+    </div>
+}
+
+<div class="card p-4 mt-3">
+    <h2 class="h6 fw-bold mb-3">Cargar documento</h2>
+    <form asp-controller="Conocimiento" asp-action="Cargar" method="post" enctype="multipart/form-data"
+          class="row g-3 align-items-end">
+        <div class="col-lg-8">
+            <label for="archivo" class="form-label">Archivo (.md, .markdown, .txt, .pdf — máx. 10 MB)</label>
+            <input type="file" id="archivo" name="archivo" class="form-control"
+                   accept=".md,.markdown,.txt,.pdf" required />
+        </div>
+        <div class="col-lg-4">
+            <button type="submit" class="btn btn-brand w-100" @(Model.QdrantConfigurado ? "" : "disabled")>
+                Indexar en Qdrant
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-md-6">
+        <div class="card p-4 h-100">
+            <h2 class="h6 fw-bold mb-2">Qdrant Cloud</h2>
+            <p class="mb-1 small" style="color: var(--muted);">
+                Colección: <code>@Model.Coleccion</code>
+            </p>
+            <p class="mb-1 small" style="color: var(--muted);">
+                Modelo de embeddings: <code>@Model.ModeloEmbedding</code>
+            </p>
+            <p class="mb-0 small" style="color: var(--muted);">
+                Endpoint: <code>@(string.IsNullOrWhiteSpace(Model.QdrantEndpoint) ? "sin configurar" : Model.QdrantEndpoint)</code>
+            </p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-4 h-100">
+            <h2 class="h6 fw-bold mb-2">Agente Groq</h2>
+            <p class="mb-1 small" style="color: var(--muted);">
+                Modelo planeado: <code>@Model.GroqModelo</code>
+            </p>
+            <p class="mb-0 small" style="color: var(--muted);">
+                @(Model.GroqConfigurado
+                    ? "API Key configurada. El agente consumirá esta base de conocimiento."
+                    : "API Key pendiente: completa la sección Groq en appsettings.json.")
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mt-3">
+    <h2 class="h6 fw-bold mb-3">Probar búsqueda semántica</h2>
+    <form asp-controller="Conocimiento" asp-action="Probar" method="post" class="d-flex flex-wrap gap-2">
+        <input type="hidden" name="busqueda" value="@Model.Busqueda" />
+        <input type="hidden" name="pagina" value="@Model.Pagina" />
+        <input type="text" name="consulta" value="@Model.Consulta" class="form-control flex-grow-1"
+               style="min-width: 240px;" placeholder="Escribe una pregunta sobre la tienda..." />
+        <button type="submit" class="btn btn-ghost px-4" @(Model.QdrantConfigurado ? "" : "disabled")>Buscar</button>
+    </form>
+</div>
+
+@if (Model.Resultados is not null)
+{
+    <div class="mt-4">
+        <h2 class="h6 fw-bold mb-3">
+            Resultados para “@Model.Consulta” (@Model.Resultados.Count)
+        </h2>
+
+        @if (!Model.Resultados.Any())
+        {
+            <div class="card p-4 text-center" style="color: var(--muted);">
+                No se encontraron fragmentos relevantes.
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var resultado in Model.Resultados)
+                {
+                    <article class="card p-4">
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                            <strong style="color: var(--forest);">@resultado.Nombre</strong>
+                            <span class="badge rounded-pill" style="background: var(--forest); color: #fff;">
+                                @resultado.Puntaje.ToString("0.000")
+                            </span>
+                        </div>
+                        <p class="mb-0" style="white-space: pre-wrap;">@resultado.Contenido</p>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+}
+
+<div class="d-flex flex-wrap align-items-center gap-2 mt-4 mb-3">
+    <h2 class="h6 fw-bold mb-0">Documentos cargados (@Model.TotalDocumentos)</h2>
+    <span class="small ms-auto" style="color: var(--muted);">
+        @Model.TotalFragmentos fragmento(s) en total
+    </span>
+</div>
+
+<div class="card p-4">
+    <form asp-controller="Conocimiento" asp-action="Index" method="get" class="d-flex flex-wrap gap-2">
+        <input type="text" name="busqueda" value="@Model.Busqueda" class="form-control flex-grow-1"
+               style="min-width: 240px;" placeholder="Filtrar documentos por nombre..." />
+        <button type="submit" class="btn btn-ghost px-4">Filtrar</button>
+        @if (!string.IsNullOrWhiteSpace(Model.Busqueda))
+        {
+            <a asp-controller="Conocimiento" asp-action="Index" class="btn btn-ghost">Limpiar</a>
+        }
+    </form>
+</div>
+
+@if (!Model.Documentos.Any())
+{
+    <div class="card p-5 text-center mt-3">
+        <p class="mb-1 fw-bold">
+            @(string.IsNullOrWhiteSpace(Model.Busqueda) ? "Todavía no hay documentos" : "Sin resultados")
+        </p>
+        <p class="mb-0" style="color: var(--muted);">
+            @if (string.IsNullOrWhiteSpace(Model.Busqueda))
+            {
+                <text>Sube tu primer archivo Markdown, de texto o PDF para construir la base de conocimiento.</text>
+            }
+            else
+            {
+                <text>Ningún documento coincide con “@Model.Busqueda”.</text>
+            }
+        </p>
+    </div>
+}
+else
+{
+    <div class="table-responsive card p-2 mt-3">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">Documento</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col" class="text-end">Fragmentos</th>
+                    <th scope="col" class="text-end">Caracteres</th>
+                    <th scope="col">Cargado</th>
+                    <th scope="col" class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var documento in Model.DocumentosPagina)
+                {
+                    <tr>
+                        <td class="fw-semibold">@documento.Nombre</td>
+                        <td><span class="badge rounded-pill" style="background: var(--line); color: var(--ink);">@documento.Tipo</span></td>
+                        <td class="text-end">@documento.Fragmentos</td>
+                        <td class="text-end">@documento.Caracteres.ToString("N0")</td>
+                        <td>@(documento.FechaCarga == default ? "-" : documento.FechaCarga.ToString("dd/MM/yyyy HH:mm"))</td>
+                        <td class="text-end">
+                            <form asp-controller="Conocimiento" asp-action="Eliminar" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@documento.Id" />
+                                <button type="submit" class="btn btn-sm btn-ghost"
+                                        onclick="return confirm('¿Eliminar @documento.Nombre de la base de conocimiento?');">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPaginas > 1)
+    {
+        <nav class="mt-3" aria-label="Paginación de documentos">
+            <ul class="pagination mb-0">
+                @for (var indice = 1; indice <= Model.TotalPaginas; indice++)
+                {
+                    <li class="page-item @(indice == Model.Pagina ? "active" : "")">
+                        <a class="page-link" asp-controller="Conocimiento" asp-action="Index"
+                           asp-route-busqueda="@Model.Busqueda" asp-route-pagina="@indice">@indice</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}

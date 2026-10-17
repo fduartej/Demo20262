@@ -608,3 +608,318 @@ a:focus-visible,
   color: rgba(255, 255, 255, .72);
   margin-top: .3rem;
 }
+
+/* ============================================================
+   Asistente de la tienda (widget flotante)
+   ============================================================ */
+
+.mm-asistente {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1200;
+}
+
+.mm-asistente-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: var(--forest);
+  color: #fff;
+  box-shadow: var(--shadow-lift);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .2s ease, background .2s ease;
+}
+
+.mm-asistente-toggle:hover {
+  background: var(--forest-deep);
+  transform: translateY(-2px);
+}
+
+.mm-asistente-panel {
+  position: absolute;
+  right: 0;
+  bottom: 74px;
+  width: min(380px, calc(100vw - 2.5rem));
+  height: min(560px, calc(100vh - 7rem));
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mm-asistente-panel[hidden] {
+  display: none;
+}
+
+.mm-asistente-head {
+  background: var(--forest);
+  color: #fff;
+  padding: .85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.mm-asistente-titulo {
+  display: block;
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.mm-asistente-sub {
+  font-size: .72rem;
+  color: rgba(255, 255, 255, .75);
+}
+
+.mm-asistente-icon {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s ease;
+}
+
+.mm-asistente-icon:hover {
+  background: rgba(255, 255, 255, .18);
+}
+
+.mm-asistente-mensajes {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  background: var(--mint);
+}
+
+.mm-asistente-bienvenida {
+  background: var(--paper);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: .75rem .9rem;
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.mm-msg {
+  max-width: 84%;
+  padding: .6rem .85rem;
+  border-radius: var(--radius-md);
+  font-size: .9rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.mm-msg-user {
+  align-self: flex-end;
+  background: var(--forest);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.mm-msg-bot {
+  align-self: flex-start;
+  background: var(--paper);
+  color: var(--ink);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-soft);
+}
+
+.mm-msg-error {
+  background: #FDECEA;
+  color: #8A2B22;
+}
+
+.mm-fuentes {
+  align-self: flex-start;
+  max-width: 84%;
+  margin-top: -.3rem;
+  padding: .1rem .35rem;
+  font-size: .72rem;
+  color: var(--muted);
+}
+
+.mm-fuentes-aviso {
+  color: #8A5222;
+  font-weight: 700;
+}
+
+/* ---- Tarjetas de producto del asistente ---- */
+
+.mm-card {
+  align-self: flex-start;
+  width: 92%;
+  max-width: 320px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.mm-card-img {
+  display: block;
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  background: var(--mint);
+}
+
+.mm-card-cuerpo {
+  padding: .7rem .85rem .8rem;
+}
+
+.mm-card-cat {
+  display: inline-block;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+}
+
+.mm-card-nombre {
+  margin: .15rem 0 .45rem;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.mm-card-precio {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--forest);
+}
+
+.mm-card-stock {
+  display: inline-block;
+  margin-top: .35rem;
+  padding: .2rem .6rem;
+  border-radius: 99px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.mm-card-stock-ok {
+  background: var(--mint);
+  color: var(--forest);
+}
+
+.mm-card-stock-agotado {
+  background: #FDECEA;
+  color: #8A2B22;
+}
+
+.mm-card-desc {
+  margin: .55rem 0 0;
+  font-size: .8rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.mm-card-link {
+  display: inline-block;
+  margin-top: .6rem;
+  font-size: .78rem;
+  font-weight: 800;
+  color: var(--forest);
+  text-decoration: none;
+}
+
+.mm-card-link:hover {
+  text-decoration: underline;
+}
+
+.mm-asistente-form {
+  display: flex;
+  gap: .5rem;
+  padding: .7rem;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.mm-asistente-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: .55rem .9rem;
+  font-family: inherit;
+  font-size: .9rem;
+  outline: none;
+}
+
+.mm-asistente-form input:focus {
+  border-color: var(--forest);
+}
+
+.mm-asistente-form button {
+  border: none;
+  background: var(--amber);
+  color: var(--ink);
+  font-weight: 700;
+  border-radius: 99px;
+  width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+
+.mm-asistente-form button:hover:not(:disabled) {
+  background: var(--amber-deep);
+}
+
+.mm-asistente-form button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.mm-typing {
+  display: inline-flex;
+  gap: .2rem;
+}
+
+.mm-typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: mm-typing-blink 1.2s infinite;
+}
+
+.mm-typing i:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.mm-typing i:nth-child(3) {
+  animation-delay: .4s;
+}
+
+@keyframes mm-typing-blink {
+  0%, 80%, 100% {
+    opacity: .25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
